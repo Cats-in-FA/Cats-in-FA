@@ -1,9 +1,11 @@
 import tkinter as tk
-from tkinter import ttk
+from functools import partial
 import random
 #Разрешение окна
 WIDTH = 750
 HEIGHT = 750
+FIELD_ROWS = 10
+FIELD_COLUMNS = 10
 
 class Cell:
     """Класс клетки на поле"""
@@ -82,6 +84,11 @@ class Field:
             print('')
         return ""
 
+def button_click(coords):
+    """Обработка начатия на button"""
+    x, y = coords
+    print("[{},{}] clicked".format(x,y))
+    
 def main():
     
     #Инициализация канваса
@@ -91,17 +98,18 @@ def main():
 
     # Ето рабочий пример-демо
     buttons_matrix = []
-    for c in range(10):
+    for c in range(FIELD_COLUMNS):
         row = []
-        for r in range(10):
-            button = tk.Button(root, text="{}:{}".format(c,r))
+        for r in range(FIELD_ROWS):
+            action = partial(button_click, (c,r))
+            button = tk.Button(root, text="{}:{}".format(c,r), command=action, highlightbackground='#3E4149')
             button.grid(row=r, column=c, sticky=tk.NW+tk.NE+tk.SW+tk.SE+tk.W+tk.E+tk.N+tk.S)
             row.append(button)
         buttons_matrix.append(row)
     root.mainloop()
     
     #Ето вызов экземпляра Поля сапёра
-    #Field1 = Field(10,10)
+    #Field1 = Field(FIELD_COLUMNS,FIELD_ROWS)
     #print(Field1)
 
 if __name__ == "__main__":
