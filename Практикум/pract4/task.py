@@ -1,75 +1,108 @@
+import tkinter as tk
+from tkinter import ttk
 import random
+#Разрешение окна
+WIDTH = 750
+HEIGHT = 750
 
-class Generator:
-    """Генерация поля"""
-    def __init__(self, n, m):
-        self.n = n
-        self.m = m
-        self.matrix = []
-        for i in range(self.n):
-            print("purr1")
-            buf_matrix = []
-            for j in range(self.m):
-                print("purr2")
-                buf_matrix.append(Cell(i, j))
-            self.matrix.append(buf_matrix)
-
-    def Filling(self):
-        print("PURRRR")
-        i = 0
-        while i <= (self.n + self.m): #Рандомная пропорция на количество бомб на поле
-            a = random.randint(0, self.n-1)
-            b = random.randint(0, self.m-1)
-            if not self.matrix[a][b].isbomb:
-                self.matrix[a][b].isbomb = True
-                i += 1 #счетчик без for, не бей меня :D
-        for i in range(self.n): #Проставляем числа
-            for j in range(self.m):
-                if not self.matrix[i][j].isbomb: #Считаем бомбы
-                    count = 0
-                    for a in range(3):
-                        for b in range(3):
-                            if (0<=(i-1+a)<self.n) and (0<=(j-1+b)<self.m) and (self.matrix[i-1+a][j-1+b].isbomb): count+=1 #Если клетка внутри поля и это бомба, то считаем
-                    self.matrix[i][j].value = count
-        return self.matrix
-
-                
-        
 class Cell:
-    """Класс клетка, потому что поле это все целиком"""
+    """Класс клетки на поле"""
     
-    def __init__(self, x, y, isbomb=False, value=0) -> None:
+    def __init__(self, x, y) -> None:
         self.x = x
         self.y = y
-        self.isbomb = isbomb
-        self.value = value
 
+        #С этими полями работать через гетеры/сеттеры
+        self.isbomb = None
+        self.value = None
+
+    #TODO при добавлении tkinter
     def click(self):
-        """Нажатие на клетку"""
+        """Обработка нажатия"""
         pass
 
 
 class Field:
-    """Класс всего поля"""
+    """Класс игрового поля"""
 
-    def __init__(self, matrix):
-        self.matrix = matrix
+    def __init__(self, n, m):
+        self.n = n
+        self.m = m
+        self.matrix = None
+        self.generation()
+        self.filler()
     
-    def PrintMatrix(self): #Если ты не понял, то это принт
-        for i in range(len(self.matrix)):
-            for j in range(len(self.matrix[i])):
-                if self.matrix[i][j].isbomb:
-                    print("Б", end=' ')
-                else:
-                    print(self.matrix[i][j].value, end=' ')
-            print('')
+    def generation(self):
+        """Генерация матрицы"""
+        matrix = []
+        for i in range(self.n):
+            buf_matrix = []
+            for j in range(self.m):
+                buf_matrix.append(Cell(i, j))
+            matrix.append(buf_matrix)
+        self.matrix = matrix
 
+    def filler(self):
+        """Заполнение матрицы данными"""
+        
+        matrix = self.matrix
+
+        #Логика расстановки бомб на игровом поле
+        bomb_counter = 0
+        while bomb_counter < (self.n + self.m):
+            x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
+            #Если выбранная клетка не бомба, то она станет бомбой
+            if not matrix[x_coord][y_coord].isbomb:
+                matrix[x_coord][y_coord].isbomb = True
+                bomb_counter += 1
+
+        #Логика выставления чисел
+        for i in range(self.n):
+            for j in range(self.m):
+                # Если это не бомба - присваиваем ей значение
+                if not matrix[i][j].isbomb:
+                    buf_value = 0
+                    for a in range(3):
+                        for b in range(3):
+                            if (0<=(i-1+a)<self.n) and (0<=(j-1+b)<self.m) and (matrix[i-1+a][j-1+b].isbomb):
+                                buf_value+=1 #Если клетка внутри поля и это бомба, то считаем
+                    matrix[i][j].value = buf_value
+        
+        self.matrix = matrix
+        
+    def __str__(self):
+        """Вывод матрицы на экран"""
+        matrix = self.matrix
+        for i in range(self.n):
+            for j in range(self.m):
+                if matrix[i][j].isbomb:
+                    print("*", end=' ')
+                else:
+                    print(matrix[i][j].value, end=' ')
+            print('')
+        return ""
 
 def main():
-    print("meow")
-    Field1 = Field(Generator(10, 10).Filling())
-    print("meow2")
-    Field1.PrintMatrix()
+    
+    #Инициализация канваса
+    root = tk.Tk()
+    c = tk.Canvas(root, width=WIDTH, heigh=HEIGHT)
+    root.title("Сапёр")
+
+    # Ето рабочий пример-демо
+    buttons_matrix = []
+    for c in range(10):
+        row = []
+        for r in range(10):
+            button = tk.Button(root, text="{}:{}".format(c,r))
+            button.grid(row=r, column=c, sticky=tk.NW+tk.NE+tk.SW+tk.SE+tk.W+tk.E+tk.N+tk.S)
+            row.append(button)
+        buttons_matrix.append(row)
+    root.mainloop()
+    
+    #Ето вызов экземпляра Поля сапёра
+    #Field1 = Field(10,10)
+    #print(Field1)
 
 if __name__ == "__main__":
     main()
