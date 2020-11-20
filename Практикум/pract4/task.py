@@ -1,9 +1,11 @@
 import tkinter as tk
-from tkinter import ttk
+from functools import partial
 import random
 #Разрешение окна
 WIDTH = 750
 HEIGHT = 750
+FIELD_ROWS = 10
+FIELD_COLUMNS = 10
 
 class Cell:
     """Класс клетки на поле"""
@@ -13,14 +15,24 @@ class Cell:
         self.y = y
 
         #С этими полями работать через гетеры/сеттеры
-        self.isbomb = None
+        self._isbomb = None
         self.value = None
 
-    #TODO при добавлении tkinter
+    #TODO
     def click(self):
-        """Обработка нажатия"""
-        pass
+        """Обработка нажатия на кнопку"""
+        print("На меня нажали")
+        print("Мои координаты: {}, {}".format(self.x, self.y))
 
+    @property
+    def isbomb(self):
+        return self._isbomb
+
+    @isbomb.setter
+    def isbomb(self, value):
+        """Выставление бомбы"""
+        self._isbomb = value
+        self.value = "*"
 
 class Field:
     """Класс игрового поля"""
@@ -75,13 +87,16 @@ class Field:
         matrix = self.matrix
         for i in range(self.n):
             for j in range(self.m):
-                if matrix[i][j].isbomb:
-                    print("*", end=' ')
-                else:
-                    print(matrix[i][j].value, end=' ')
+                print(matrix[i][j].value, end=' ')
             print('')
         return ""
 
+def button_click(coords):
+    """Обработка нажатия на button на уровне tkinter"""
+    obj, x, y = coords
+    obj.matrix[x][y].click()
+    #TODO тут можно обновить значения button'ов или что-то подобное
+    
 def main():
     
     #Инициализация канваса
@@ -89,20 +104,22 @@ def main():
     c = tk.Canvas(root, width=WIDTH, heigh=HEIGHT)
     root.title("Сапёр")
 
+    #Экземпляр игрового поля
+    field_obj = Field(FIELD_COLUMNS,FIELD_ROWS)
+    print(field_obj)
+
     # Ето рабочий пример-демо
     buttons_matrix = []
-    for c in range(10):
+    for c in range(FIELD_COLUMNS):
         row = []
-        for r in range(10):
-            button = tk.Button(root, text="{}:{}".format(c,r))
+        for r in range(FIELD_ROWS):
+            action = partial(button_click, (field_obj, c,r))
+            button = tk.Button(root, text=str(field_obj.matrix[c][r].value), command=action, highlightbackground='#3E4149')
             button.grid(row=r, column=c, sticky=tk.NW+tk.NE+tk.SW+tk.SE+tk.W+tk.E+tk.N+tk.S)
             row.append(button)
         buttons_matrix.append(row)
     root.mainloop()
     
-    #Ето вызов экземпляра Поля сапёра
-    #Field1 = Field(10,10)
-    #print(Field1)
 
 if __name__ == "__main__":
     main()
