@@ -40,23 +40,13 @@ class Field:
     """Класс игрового поля"""
 
     @staticmethod
-    def reloadbutton_click(obj=None):
+    def reloadbutton_click():
         """Обработка нажатия на button перезапуска игры"""
-        
-        game_counter = 1
-        #Если уже играли, то берем номер игры из объекта предыдущей игры
-        if obj is not None and isinstance(obj, Field):
-            game_counter = obj.game_number
-            game_counter += 1
+        return Field(10,10)
 
-        return Field(10,10, game_counter)
-
-    def __init__(self, n, m, game_number):
+    def __init__(self, n, m):
         self.n = n
         self.m = m
-        self.game_number = game_number
-        print("ИГРА НОМЕР")
-        print(game_number)
         self.first_click = True
 
         self.matrix = None
@@ -122,7 +112,6 @@ class Field:
             self.matrix[x][y].isquestion=False
         else:
             self.matrix[x][y].isflag=True
-        print("НАЖАЛИ НА ПРАВУЮ")
         self.synchronizer()
 
     def recursion_clicker(self, x, y, first_flag=True):
@@ -153,8 +142,6 @@ class Field:
             for y in range(self.m):
                 if self.matrix[x][y].isbomb:
                     self.matrix[x][y].click()
-        return
-
 
     def generation(self):
         """Генерация основной матрицы"""
@@ -187,15 +174,13 @@ class Field:
 
             label1 = tk.Label(text="Ваш счёт:")
             label2 = tk.Label(text="Ваш счёт:")
-            label3 = tk.Label(text="Игра №{}".format(self.game_number))
             reload_button = tk.Button(root, text="Перезапуск", command=Field.reloadbutton_click)
 
             #Привязка прочих элементов к сетке
             label1.grid(row=1, column=0)
             label2.grid(row=2, column=0)
 
-            reload_button.grid(row=self.n-1, column=0)
-            label3.grid(row=self.n, column=0)
+            reload_button.grid(row=self.n, column=0)
         self.buttons_matrix = buttons_matrix
     
     def synchronizer(self):
@@ -240,9 +225,8 @@ def main():
     
     root.title("Сапёр")
     #Экземпляр игрового поля
-    obj = Field.reloadbutton_click()
+    Field.reloadbutton_click()
     root.mainloop()
-    
 
 if __name__ == "__main__":
     main()
