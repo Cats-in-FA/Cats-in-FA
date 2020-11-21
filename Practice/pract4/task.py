@@ -87,6 +87,7 @@ class Field:
 
     def matrixbutton_leftclick(self, coords, event):
         """Обработка нажатия на button"""
+        # Если первое нажатие
         if self.first_click:
             self.filler(coords)
             self.first_click = False
@@ -192,8 +193,8 @@ class Field:
             "3" : "red2",
             "4" : "medium blue",
             "5" : "red4",
-            "6" : "turquoise4", #аква
-            "7" : "dark orchid", #фиолетовый
+            "6" : "turquoise4",
+            "7" : "dark orchid",
             "8" : "dark slate blue",
             "x" : "black",
         }
