@@ -100,7 +100,7 @@ class Field:
             row = []
             for r in range(self.m):
                 action = partial(self.button_clicker, (c,r))
-                button = tk.Button(root, text=str(self.matrix[c][r].value), height = 1, width = 1, compound="center", command=action, highlightbackground='#3E4149')
+                button = tk.Button(root, text=str(self.matrix[c][r].value), command=action)
                 button.grid(row=r, column=c)
                 row.append(button)
             buttons_matrix.append(row)
@@ -109,15 +109,31 @@ class Field:
     #TODO
     def synchronizer(self):
         """Синхронизация значений в self.matrix с buttons_matrix"""
-        print("Запустили синхронизацию")
+        number2color_dict = {
+            "0" : "white",
+            "1" : "blue2",
+            "2" : "green2",
+            "3" : "red2",
+            "4" : "cyan",
+            "5" : "red4",
+            "6" : "purple1",
+            "7" : "yellow",
+            "8" : "magenta2",
+            "*" : "black",
+        }
+
+
         for c in range(self.n):
             for r in range(self.m):
                 #Если нет нажатия на button - значение неизвестно
+
+                
                 if not self.matrix[c][r].isclicked:
-                    self.buttons_matrix[c][r].config(text=" ")
+                   
+                    self.buttons_matrix[c][r].config(text="    ", bg="#f7f5f5")
                 else:
                     value = self.matrix[c][r].value
-                    self.buttons_matrix[c][r].config(text=str(value), fg='red', bg='white')
+                    self.buttons_matrix[c][r].config(text=" {} ".format(str(value).replace("0", "  ")), disabledforeground=number2color_dict[str(value)], state=tk.DISABLED, bg="#b8b8b8", borderwidth=0)
         
 
     def __str__(self):
@@ -134,7 +150,6 @@ def main():
     #Инициализация канваса
     c = tk.Canvas(root, width=WIDTH, heigh=HEIGHT)
     root.title("Сапёр")
-    root.geometry('600x600')
 
     #Экземпляр игрового поля
     field_obj = Field(10,10)
