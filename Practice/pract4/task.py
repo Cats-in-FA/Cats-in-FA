@@ -5,7 +5,6 @@ root = tk.Tk()
 
 #TODO проверка на окончание игры (победа, проигрыш)
 #TODO открытие всех бомб после окончания игры
-#TODO фильтрация на первый ход (БОМБА)
 #TODO выставление игроком флагов и вопросов
 #TODO ведение счета
 
@@ -108,6 +107,8 @@ class Field:
         # Если значение ячейки 0, то раскрываем соседние ячейки до тех пор, пока не до дойдем до ячейки с числом
         if self.matrix[x][y].value == 0:
             self.recursion_clicker(x, y)
+        elif self.matrix[x][y].value == "x":
+            self.bombs_opening()
 
         self.synchronizer()
 
@@ -139,6 +140,15 @@ class Field:
 
         else:
             return
+
+    def bombs_opening(self):
+        """Раскрытие всех бомб на поле"""
+        for x in range(self.n):
+            for y in range(self.m):
+                if self.matrix[x][y].isbomb:
+                    self.matrix[x][y].click()
+        return
+
 
     def generation(self):
         """Генерация основной матрицы"""
