@@ -1,17 +1,13 @@
 import tkinter as tk
 from functools import partial
 import random
-#Разрешение окна
-WIDTH = 600
-HEIGHT = 600
 root = tk.Tk()
 
 #TODO проверка на окончание игры (победа, проигрыш)
 #TODO открытие всех бомб после окончания игры
 #TODO фильтрация на первый ход (БОМБА)
 #TODO выставление игроком флагов и вопросов
-#TODO введение счета
-#TODO сброс игры
+#TODO ведение счета
 
 class Cell:
     """Класс клетки на поле"""
@@ -20,10 +16,12 @@ class Cell:
         self.x = x
         self.y = y
 
-        #С этими полями работать через гетеры/сеттеры
         self._isbomb = None
         self.value = None
         self.isclicked = False
+        self.isquestion = False
+        self.isflag = False
+
 
     def click(self):
         """Обработка нажатия на кнопку"""
@@ -39,14 +37,32 @@ class Cell:
         self._isbomb = value
         self.value = "x"
 
+
 class Field:
     """Класс игрового поля"""
 
-    def __init__(self, n, m):
+    @staticmethod
+    def reloadbutton_click(obj=None):
+        """Обработка нажатия на button перезапуска игры"""
+        
+        game_counter = 1
+        #Если уже играли, то берем номер игры из объекта предыдущей игры
+        if obj is not None and isinstance(obj, Field):
+            game_counter = obj.game_number
+            game_counter += 1
+
+        return Field(10,10, game_counter)
+
+    def __init__(self, n, m, game_number):
         self.n = n
         self.m = m
+        self.game_number = game_number
+        print("ИГРА НОМЕР")
+        print(game_number)
+
         self.matrix = None
         self.buttons_matrix = None
+
         self.generation()
         self.filler()
         self.buttonsmatrix_filler()
@@ -59,8 +75,8 @@ class Field:
 
         #Логика расстановки бомб на игровом поле
         bomb_counter = 0
-        #TODO ПОМЕНЯТЬ
-        while bomb_counter < 60:
+
+        while bomb_counter < (self.n+self.m):
             x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
             #Если выбранная клетка не бомба, то она станет бомбой
             if not matrix[x_coord][y_coord].isbomb:
@@ -81,8 +97,8 @@ class Field:
         
         self.matrix = matrix
 
-    def button_clicker(self, coords):
-        """Обработка нажатия на button на уровне tkinter"""
+    def matrixbutton_leftclick(self, coords, event):
+        """Обработка нажатия на button"""
         x, y = coords
         self.matrix[x][y].click()
 
@@ -91,6 +107,13 @@ class Field:
             self.recursion_clicker(x, y)
 
         self.synchronizer()
+
+    # TODO
+    def matrixbutton_rightclick(self, coords, event):
+        """Обработка выставляения флага/вопроса на button"""
+        x, y = coords
+        print("НАЖАЛИ НА ПРАВУЮ")
+
 
     def recursion_clicker(self, x, y, first_flag=True):
         """Рекурсивное раскрытитие соседних ячеек"""
@@ -125,17 +148,35 @@ class Field:
         self.matrix = matrix
 
     def buttonsmatrix_filler(self):
-        """Генерация матрицы buttonов"""
+        """Генерация матрицы buttonов и элементов интерфейса"""
 
         buttons_matrix = []
         for c in range(self.n):
             row = []
             for r in range(self.m):
-                action = partial(self.button_clicker, (c,r))
-                button = tk.Button(root, text=str(self.matrix[c][r].value), command=action)
-                button.grid(row=c, column=r)
+                #Генерация buttonов
+                action_left = partial(self.matrixbutton_leftclick, (c,r))
+                action_right = partial(self.matrixbutton_rightclick, (c,r))
+                button = tk.Button(root, text=str(self.matrix[c][r].value))
+                #Обработка нажатий мышью
+                button.bind("<Button-1>", action_left)
+                button.bind("<Button-2>", action_right)
+                button.bind("<Button-3>", action_right)
+                button.grid(row=c+1, column=r+1)
                 row.append(button)
             buttons_matrix.append(row)
+
+            label1 = tk.Label(text="Ваш счёт:")
+            label2 = tk.Label(text="Ваш счёт:")
+            label3 = tk.Label(text="Игра №{}".format(self.game_number))
+            reload_button = tk.Button(root, text="Перезапуск", command=Field.reloadbutton_click)
+
+            #Привязка прочих элементов к сетке
+            label1.grid(row=1, column=0)
+            label2.grid(row=2, column=0)
+
+            reload_button.grid(row=self.n-1, column=0)
+            label3.grid(row=self.n, column=0)
         self.buttons_matrix = buttons_matrix
     
     def synchronizer(self):
@@ -172,13 +213,9 @@ class Field:
     
 def main():
     
-    #Инициализация канваса
     root.title("Сапёр")
-
     #Экземпляр игрового поля
-    field_obj = Field(10,10)
-    print(field_obj)
-    
+    obj = Field.reloadbutton_click()
     root.mainloop()
     
 
