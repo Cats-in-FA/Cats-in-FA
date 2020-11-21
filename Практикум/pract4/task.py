@@ -109,6 +109,7 @@ class Field:
     #TODO
     def synchronizer(self):
         """Синхронизация значений в self.matrix с buttons_matrix"""
+        #TODO Проверить, чтоб все цвета существовали в tkinter
         number2color_dict = {
             "0" : "white",
             "1" : "blue2",
@@ -121,20 +122,14 @@ class Field:
             "8" : "magenta2",
             "*" : "black",
         }
-
-
         for c in range(self.n):
             for r in range(self.m):
                 #Если нет нажатия на button - значение неизвестно
-
-                
-                if not self.matrix[c][r].isclicked:
-                   
-                    self.buttons_matrix[c][r].config(text="    ", bg="#f7f5f5")
+                if not self.matrix[c][r].isclicked:           
+                    self.buttons_matrix[c][r].config(text="    ")
                 else:
                     value = self.matrix[c][r].value
-                    self.buttons_matrix[c][r].config(text=" {} ".format(str(value).replace("0", "  ")), disabledforeground=number2color_dict[str(value)], state=tk.DISABLED, bg="#b8b8b8", borderwidth=0)
-        
+                    self.buttons_matrix[c][r].config(text=" {} ".format(str(value).replace("0", "  ")), disabledforeground=number2color_dict[str(value)], state=tk.DISABLED, bg="#b8b8b8", relief="flat")
 
     def __str__(self):
         """Вывод матрицы на экран"""
