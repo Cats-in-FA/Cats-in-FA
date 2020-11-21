@@ -4,7 +4,6 @@ import random
 root = tk.Tk()
 
 #TODO проверка на окончание игры (победа, проигрыш)
-#TODO выставление игроком флагов и вопросов
 #TODO ведение счета
 
 class Cell:
@@ -23,7 +22,7 @@ class Cell:
 
     def click(self):
         """Обработка нажатия на кнопку"""
-        if not self.isflag:
+        if (not self.isflag) and (not self.isquestion):
             self.isclicked = True
 
     @property
@@ -107,7 +106,7 @@ class Field:
         # Если значение ячейки 0, то раскрываем соседние ячейки до тех пор, пока не до дойдем до ячейки с числом
         if self.matrix[x][y].value == 0:
             self.recursion_clicker(x, y)
-        elif self.matrix[x][y].value == "x":
+        elif self.matrix[x][y].isclicked and self.matrix[x][y].value == "x":
             self.bombs_opening()
             # TODO конец игры
 
@@ -118,6 +117,9 @@ class Field:
         x, y = coords
         if self.matrix[x][y].isflag:
             self.matrix[x][y].isflag=False
+            self.matrix[x][y].isquestion=True
+        elif self.matrix[x][y].isquestion:
+            self.matrix[x][y].isquestion=False
         else:
             self.matrix[x][y].isflag=True
         print("НАЖАЛИ НА ПРАВУЮ")
@@ -215,9 +217,11 @@ class Field:
                 #Если нет нажатия на button - значение неизвестно
                 if not self.matrix[c][r].isclicked:           
                     self.buttons_matrix[c][r].config(text="    ")
-                    #Если мы поставили флаг
+                    #Если мы поставили флаг или вопрос
                     if self.matrix[c][r].isflag:
                         self.buttons_matrix[c][r].config(text=" F ")
+                    elif self.matrix[c][r].isquestion:
+                        self.buttons_matrix[c][r].config(text=" ? ")
                 #Если нажали на кнопку
                 else:
                     value = self.matrix[c][r].value
