@@ -6,6 +6,7 @@ WIDTH = 750
 HEIGHT = 750
 FIELD_ROWS = 10
 FIELD_COLUMNS = 10
+root = tk.Tk()
 
 class Cell:
     """Класс клетки на поле"""
@@ -17,10 +18,12 @@ class Cell:
         #С этими полями работать через гетеры/сеттеры
         self._isbomb = None
         self.value = None
+        self.isclicked = False
 
     #TODO
     def click(self):
         """Обработка нажатия на кнопку"""
+        self.isclicked = True
         print("На меня нажали")
         print("Мои координаты: {}, {}".format(self.x, self.y))
 
@@ -41,18 +44,10 @@ class Field:
         self.n = n
         self.m = m
         self.matrix = None
+        self.buttons_matrix = None
         self.generation()
         self.filler()
-    
-    def generation(self):
-        """Генерация матрицы"""
-        matrix = []
-        for i in range(self.n):
-            buf_matrix = []
-            for j in range(self.m):
-                buf_matrix.append(Cell(i, j))
-            matrix.append(buf_matrix)
-        self.matrix = matrix
+        self.buttonsmatrix_generation()
 
     def filler(self):
         """Заполнение матрицы данными"""
@@ -81,7 +76,43 @@ class Field:
                     matrix[i][j].value = buf_value
         
         self.matrix = matrix
+
+    def button_clicker(self, coords):
+        """Обработка нажатия на button на уровне tkinter"""
+        x, y = coords
+        self.matrix[x][y].click()
+        self.synchronizer()
+
+    def generation(self):
+        """Генерация основной матрицы"""
+        matrix = []
+        for i in range(self.n):
+            buf_matrix = []
+            for j in range(self.m):
+                buf_matrix.append(Cell(i, j))
+            matrix.append(buf_matrix)
+        self.matrix = matrix
+
+    def buttonsmatrix_generation(self):
+        """Генерация матрицы buttonов"""
+        buttons_matrix = []
+        for c in range(FIELD_COLUMNS):
+            row = []
+            for r in range(FIELD_ROWS):
+                action = partial(self.button_clicker, (c,r))
+                button = tk.Button(root, text=str(self.matrix[c][r].value), command=action, highlightbackground='#3E4149')
+                button.grid(row=r, column=c, sticky=tk.NW+tk.NE+tk.SW+tk.SE+tk.W+tk.E+tk.N+tk.S)
+                row.append(button)
+            buttons_matrix.append(row)
+        self.buttons_matrix = buttons_matrix
+    
+    #TODO
+    def synchronizer(self):
+        """Синхронизация значений в self.matrix с buttons_matrix"""
+        print("Запустили синхронизацию")
+        pass
         
+
     def __str__(self):
         """Вывод матрицы на экран"""
         matrix = self.matrix
@@ -90,34 +121,17 @@ class Field:
                 print(matrix[i][j].value, end=' ')
             print('')
         return ""
-
-def button_click(coords):
-    """Обработка нажатия на button на уровне tkinter"""
-    obj, x, y = coords
-    obj.matrix[x][y].click()
-    #TODO тут можно обновить значения button'ов или что-то подобное
     
 def main():
     
     #Инициализация канваса
-    root = tk.Tk()
     c = tk.Canvas(root, width=WIDTH, heigh=HEIGHT)
     root.title("Сапёр")
 
     #Экземпляр игрового поля
     field_obj = Field(FIELD_COLUMNS,FIELD_ROWS)
     print(field_obj)
-
-    # Ето рабочий пример-демо
-    buttons_matrix = []
-    for c in range(FIELD_COLUMNS):
-        row = []
-        for r in range(FIELD_ROWS):
-            action = partial(button_click, (field_obj, c,r))
-            button = tk.Button(root, text=str(field_obj.matrix[c][r].value), command=action, highlightbackground='#3E4149')
-            button.grid(row=r, column=c, sticky=tk.NW+tk.NE+tk.SW+tk.SE+tk.W+tk.E+tk.N+tk.S)
-            row.append(button)
-        buttons_matrix.append(row)
+    
     root.mainloop()
     
 
