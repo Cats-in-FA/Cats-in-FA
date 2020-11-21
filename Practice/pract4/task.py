@@ -7,8 +7,7 @@ root = tk.Tk()
 #TODO открытие всех бомб после окончания игры
 #TODO фильтрация на первый ход (БОМБА)
 #TODO выставление игроком флагов и вопросов
-#TODO введение счета
-#TODO сброс игры
+#TODO ведение счета
 
 class Cell:
     """Класс клетки на поле"""
@@ -36,6 +35,7 @@ class Cell:
         self._isbomb = value
         self.value = "•"
 
+
 class Field:
     """Класс игрового поля"""
 
@@ -61,7 +61,7 @@ class Field:
 
         #Логика расстановки бомб на игровом поле
         bomb_counter = 0
-        #TODO ПОМЕНЯТЬ
+
         while bomb_counter < (self.n+self.m):
             x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
             #Если выбранная клетка не бомба, то она станет бомбой
@@ -83,8 +83,8 @@ class Field:
         
         self.matrix = matrix
 
-    def matrixbutton_click(self, coords):
-        """Обработка нажатия на button на уровне tkinter"""
+    def matrixbutton_leftclick(self, coords, event):
+        """Обработка нажатия на button"""
         x, y = coords
         self.matrix[x][y].click()
 
@@ -93,6 +93,13 @@ class Field:
             self.recursion_clicker(x, y)
 
         self.synchronizer()
+
+    # TODO
+    def matrixbutton_rightclick(self, coords, event):
+        """Обработка выставляения флага/вопроса на button"""
+        x, y = coords
+        print("НАЖАЛИ НА ПРАВУЮ")
+
 
     def recursion_clicker(self, x, y, first_flag=True):
         """Рекурсивное раскрытитие соседних ячеек"""
@@ -134,8 +141,13 @@ class Field:
             row = []
             for r in range(self.m):
                 #Генерация buttonов
-                action = partial(self.matrixbutton_click, (c,r))
-                button = tk.Button(root, text=str(self.matrix[c][r].value), command=action)
+                action_left = partial(self.matrixbutton_leftclick, (c,r))
+                action_right = partial(self.matrixbutton_rightclick, (c,r))
+                button = tk.Button(root, text=str(self.matrix[c][r].value))
+                #Обработка нажатий мышью
+                button.bind("<Button-1>", action_left)
+                button.bind("<Button-2>", action_right)
+                button.bind("<Button-3>", action_right)
                 button.grid(row=c+1, column=r+1)
                 row.append(button)
             buttons_matrix.append(row)
