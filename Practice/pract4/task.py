@@ -4,7 +4,6 @@ import random
 root = tk.Tk()
 
 #TODO проверка на окончание игры (победа, проигрыш)
-#TODO открытие всех бомб после окончания игры
 #TODO выставление игроком флагов и вопросов
 #TODO ведение счета
 
@@ -24,7 +23,8 @@ class Cell:
 
     def click(self):
         """Обработка нажатия на кнопку"""
-        self.isclicked = True
+        if not self.isflag:
+            self.isclicked = True
 
     @property
     def isbomb(self):
@@ -109,15 +109,19 @@ class Field:
             self.recursion_clicker(x, y)
         elif self.matrix[x][y].value == "x":
             self.bombs_opening()
+            # TODO конец игры
 
         self.synchronizer()
 
-    # TODO
     def matrixbutton_rightclick(self, coords, event):
         """Обработка выставляения флага/вопроса на button"""
         x, y = coords
+        if self.matrix[x][y].isflag:
+            self.matrix[x][y].isflag=False
+        else:
+            self.matrix[x][y].isflag=True
         print("НАЖАЛИ НА ПРАВУЮ")
-
+        self.synchronizer()
 
     def recursion_clicker(self, x, y, first_flag=True):
         """Рекурсивное раскрытитие соседних ячеек"""
@@ -211,6 +215,10 @@ class Field:
                 #Если нет нажатия на button - значение неизвестно
                 if not self.matrix[c][r].isclicked:           
                     self.buttons_matrix[c][r].config(text="    ")
+                    #Если мы поставили флаг
+                    if self.matrix[c][r].isflag:
+                        self.buttons_matrix[c][r].config(text=" F ")
+                #Если нажали на кнопку
                 else:
                     value = self.matrix[c][r].value
                     self.buttons_matrix[c][r].config(text=" {} ".format(str(value).replace("0", "  ")), disabledforeground=number2color_dict[str(value)], state=tk.DISABLED, bg="#b8b8b8", relief="flat")
