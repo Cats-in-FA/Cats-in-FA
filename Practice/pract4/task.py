@@ -59,18 +59,18 @@ class Field:
         self.game_number = game_number
         print("ИГРА НОМЕР")
         print(game_number)
+        self.first_click = True
 
         self.matrix = None
         self.buttons_matrix = None
 
         self.generation()
-        self.filler()
         self.buttonsmatrix_filler()
         self.synchronizer()
 
-    def filler(self):
+    def filler(self, coords=()):
         """Заполнение матрицы данными"""
-        
+        x_first, y_first = coords
         matrix = self.matrix
 
         #Логика расстановки бомб на игровом поле
@@ -79,7 +79,7 @@ class Field:
         while bomb_counter < (self.n+self.m):
             x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
             #Если выбранная клетка не бомба, то она станет бомбой
-            if not matrix[x_coord][y_coord].isbomb:
+            if (not matrix[x_coord][y_coord].isbomb) and (x_coord != x_first) and (y_coord != y_first):
                 matrix[x_coord][y_coord].isbomb = True
                 bomb_counter += 1
 
@@ -99,6 +99,9 @@ class Field:
 
     def matrixbutton_leftclick(self, coords, event):
         """Обработка нажатия на button"""
+        if self.first_click:
+            self.filler(coords)
+            self.first_click = False
         x, y = coords
         self.matrix[x][y].click()
 
@@ -157,7 +160,7 @@ class Field:
                 #Генерация buttonов
                 action_left = partial(self.matrixbutton_leftclick, (c,r))
                 action_right = partial(self.matrixbutton_rightclick, (c,r))
-                button = tk.Button(root, text=str(self.matrix[c][r].value))
+                button = tk.Button(root, text=str(self.matrix[c][r].value)) 
                 #Обработка нажатий мышью
                 button.bind("<Button-1>", action_left)
                 button.bind("<Button-2>", action_right)
