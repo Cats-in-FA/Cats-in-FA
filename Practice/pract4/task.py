@@ -35,7 +35,7 @@ class Cell:
     def isbomb(self, value):
         """Выставление бомбы"""
         self._isbomb = value
-        self.value = "•"
+        self.value = "x"
 
 
 class Field:
@@ -188,10 +188,10 @@ class Field:
             "3" : "red2",
             "4" : "medium blue",
             "5" : "red4",
-            "6" : "turquoise4",
-            "7" : "dark orchid",
-            "8" : "black",
-            "•" : "black",
+            "6" : "turquoise4", #аква
+            "7" : "dark orchid", #фиолетовый
+            "8" : "dark slate blue",
+            "x" : "black",
         }
         for c in range(self.n):
             for r in range(self.m):
