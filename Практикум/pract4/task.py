@@ -55,7 +55,8 @@ class Field:
 
         #Логика расстановки бомб на игровом поле
         bomb_counter = 0
-        while bomb_counter < (3):
+        #TODO ПОМЕНЯТЬ
+        while bomb_counter < (5):
             x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
             #Если выбранная клетка не бомба, то она станет бомбой
             if not matrix[x_coord][y_coord].isbomb:
@@ -93,7 +94,7 @@ class Field:
             self.matrix[x][y].click()
         except IndexError:
             return
-
+        print(self.matrix[x][y].value)
         if self.matrix[x][y].value == 0:
             self.recursion_clicker(x-1, y)
             self.recursion_clicker(x-1, y+1)
