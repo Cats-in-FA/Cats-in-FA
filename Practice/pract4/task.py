@@ -38,7 +38,7 @@ class Cell:
     def isbomb(self, value):
         """Выставление бомбы"""
         self._isbomb = value
-        self.value = "*"
+        self.value = "•"
 
 class Field:
     """Класс игрового поля"""
@@ -61,7 +61,7 @@ class Field:
         #Логика расстановки бомб на игровом поле
         bomb_counter = 0
         #TODO ПОМЕНЯТЬ
-        while bomb_counter < (self.n + self.m):
+        while bomb_counter < 60:
             x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
             #Если выбранная клетка не бомба, то она станет бомбой
             if not matrix[x_coord][y_coord].isbomb:
@@ -143,15 +143,15 @@ class Field:
         """Синхронизация значений в self.matrix с buttons_matrix"""
         number2color_dict = {
             "0" : "white",
-            "1" : "blue2",
-            "2" : "green2",
+            "1" : "royal blue",
+            "2" : "forest green",
             "3" : "red2",
-            "4" : "cyan", #темно-синий
+            "4" : "medium blue",
             "5" : "red4",
-            "6" : "purple1", #аква
-            "7" : "yellow", #фиол
-            "8" : "magenta2",#черный
-            "*" : "black",
+            "6" : "turquoise4", #аква
+            "7" : "dark orchid", #фиолетовый
+            "8" : "black",
+            "•" : "black",
         }
         for c in range(self.n):
             for r in range(self.m):
@@ -177,7 +177,7 @@ def main():
     root.title("Сапёр")
 
     #Экземпляр игрового поля
-    field_obj = Field(20,20)
+    field_obj = Field(10,10)
     print(field_obj)
     
     root.mainloop()
