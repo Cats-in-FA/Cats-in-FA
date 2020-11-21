@@ -16,10 +16,12 @@ class Cell:
         self.x = x
         self.y = y
 
-        #С этими полями работать через гетеры/сеттеры
         self._isbomb = None
         self.value = None
         self.isclicked = False
+        self.isquestion = False
+        self.isflag = False
+
 
     def click(self):
         """Обработка нажатия на кнопку"""
@@ -40,15 +42,27 @@ class Field:
     """Класс игрового поля"""
 
     @staticmethod
-    def reloadbutton_click():
+    def reloadbutton_click(obj=None):
         """Обработка нажатия на button перезапуска игры"""
-        return Field(10,10)
+        
+        game_counter = 1
+        #Если уже играли, то берем номер игры из объекта предыдущей игры
+        if obj is not None and isinstance(obj, Field):
+            game_counter = obj.game_number
+            game_counter += 1
 
-    def __init__(self, n, m):
+        return Field(10,10, game_counter)
+
+    def __init__(self, n, m, game_number):
         self.n = n
         self.m = m
+        self.game_number = game_number
+        print("ИГРА НОМЕР")
+        print(game_number)
+
         self.matrix = None
         self.buttons_matrix = None
+
         self.generation()
         self.filler()
         self.buttonsmatrix_filler()
@@ -154,7 +168,7 @@ class Field:
 
             label1 = tk.Label(text="Ваш счёт:")
             label2 = tk.Label(text="Ваш счёт:")
-            label3 = tk.Label(text="Имя2")
+            label3 = tk.Label(text="Игра №{}".format(self.game_number))
             reload_button = tk.Button(root, text="Перезапуск", command=Field.reloadbutton_click)
 
             #Привязка прочих элементов к сетке
@@ -202,8 +216,6 @@ def main():
     root.title("Сапёр")
     #Экземпляр игрового поля
     obj = Field.reloadbutton_click()
-    print(obj)
-
     root.mainloop()
     
 
