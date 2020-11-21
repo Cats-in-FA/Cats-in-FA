@@ -2,27 +2,25 @@ import tkinter as tk
 from functools import partial
 import random
 #Разрешение окна
-WIDTH = 750
-HEIGHT = 750
-FIELD_ROWS = 10
-FIELD_COLUMNS = 10
+WIDTH = 600
+HEIGHT = 600
+root = tk.Tk()
 
 class Cell:
     """Класс клетки на поле"""
     
-    def __init__(self, x, y) -> None:
+    def __init__(self, x, y):
         self.x = x
         self.y = y
 
         #С этими полями работать через гетеры/сеттеры
         self._isbomb = None
         self.value = None
+        self.isclicked = False
 
-    #TODO
     def click(self):
         """Обработка нажатия на кнопку"""
-        print("На меня нажали")
-        print("Мои координаты: {}, {}".format(self.x, self.y))
+        self.isclicked = True
 
     @property
     def isbomb(self):
@@ -41,18 +39,11 @@ class Field:
         self.n = n
         self.m = m
         self.matrix = None
+        self.buttons_matrix = None
         self.generation()
         self.filler()
-    
-    def generation(self):
-        """Генерация матрицы"""
-        matrix = []
-        for i in range(self.n):
-            buf_matrix = []
-            for j in range(self.m):
-                buf_matrix.append(Cell(i, j))
-            matrix.append(buf_matrix)
-        self.matrix = matrix
+        self.buttonsmatrix_filler()
+        self.synchronizer()
 
     def filler(self):
         """Заполнение матрицы данными"""
@@ -61,7 +52,8 @@ class Field:
 
         #Логика расстановки бомб на игровом поле
         bomb_counter = 0
-        while bomb_counter < (self.n + self.m):
+        #TODO ПОМЕНЯТЬ
+        while bomb_counter < (5):
             x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
             #Если выбранная клетка не бомба, то она станет бомбой
             if not matrix[x_coord][y_coord].isbomb:
@@ -81,7 +73,95 @@ class Field:
                     matrix[i][j].value = buf_value
         
         self.matrix = matrix
-        
+
+    def button_clicker(self, coords):
+        """Обработка нажатия на button на уровне tkinter"""
+        x, y = coords
+        self.matrix[x][y].click()
+
+        # Если значение ячейки 0, то раскрываем соседние ячейки до тех пор, пока не до дойдем до ячейки с числом
+        if self.matrix[x][y].value == 0:
+            self.recursion_clicker(x, y)
+
+        self.synchronizer()
+
+    #TODO Посмотреть на адекватонсть реализации 
+    def recursion_clicker(self, x, y, first_flag=True):
+        """Рекурсивное раскрытитие соседних ячеек"""
+        #Проверка на выход из диапазона
+        if x > self.n-1 or x < 0 or y > self.m-1 or y < 0:
+            return
+
+        #Если уже кликнули на эту ячейку и это не 1 итерация - выходим
+        if not first_flag and self.matrix[x][y].isclicked:
+            return
+       
+        #Раскрываем ячейку
+        self.matrix[x][y].click()
+
+        #Если значение этой ячейки 0, то запускаем рекурсия
+        if self.matrix[x][y].value == 0:
+
+            #TODO Кажется я не охватил весь диапазон
+            self.recursion_clicker(x-1, y, False)
+            self.recursion_clicker(x-1, y+1, False)
+            self.recursion_clicker(x-1, y-1, False)
+
+            self.recursion_clicker(x+1, y, False)
+            self.recursion_clicker(x+1, y+1, False)
+            self.recursion_clicker(x+1, y-1, False)
+        else:
+            return
+
+
+    def generation(self):
+        """Генерация основной матрицы"""
+        matrix = []
+        for i in range(self.n):
+            buf_matrix = []
+            for j in range(self.m):
+                buf_matrix.append(Cell(i, j))
+            matrix.append(buf_matrix)
+        self.matrix = matrix
+
+    def buttonsmatrix_filler(self):
+        """Генерация матрицы buttonов"""
+
+        buttons_matrix = []
+        for c in range(self.n):
+            row = []
+            for r in range(self.m):
+                action = partial(self.button_clicker, (c,r))
+                button = tk.Button(root, text=str(self.matrix[c][r].value), command=action)
+                button.grid(row=c, column=r)
+                row.append(button)
+            buttons_matrix.append(row)
+        self.buttons_matrix = buttons_matrix
+    
+    def synchronizer(self):
+        """Синхронизация значений в self.matrix с buttons_matrix"""
+        #TODO Проверить, чтоб все цвета существовали в tkinter
+        number2color_dict = {
+            "0" : "white",
+            "1" : "blue2",
+            "2" : "green2",
+            "3" : "red2",
+            "4" : "cyan",
+            "5" : "red4",
+            "6" : "purple1",
+            "7" : "yellow",
+            "8" : "magenta2",
+            "*" : "black",
+        }
+        for c in range(self.n):
+            for r in range(self.m):
+                #Если нет нажатия на button - значение неизвестно
+                if not self.matrix[c][r].isclicked:           
+                    self.buttons_matrix[c][r].config(text="    ")
+                else:
+                    value = self.matrix[c][r].value
+                    self.buttons_matrix[c][r].config(text=" {} ".format(str(value).replace("0", "  ")), disabledforeground=number2color_dict[str(value)], state=tk.DISABLED, bg="#b8b8b8", relief="flat")
+
     def __str__(self):
         """Вывод матрицы на экран"""
         matrix = self.matrix
@@ -90,34 +170,17 @@ class Field:
                 print(matrix[i][j].value, end=' ')
             print('')
         return ""
-
-def button_click(coords):
-    """Обработка нажатия на button на уровне tkinter"""
-    obj, x, y = coords
-    obj.matrix[x][y].click()
-    #TODO тут можно обновить значения button'ов или что-то подобное
     
 def main():
     
     #Инициализация канваса
-    root = tk.Tk()
     c = tk.Canvas(root, width=WIDTH, heigh=HEIGHT)
     root.title("Сапёр")
 
     #Экземпляр игрового поля
-    field_obj = Field(FIELD_COLUMNS,FIELD_ROWS)
+    field_obj = Field(10,10)
     print(field_obj)
-
-    # Ето рабочий пример-демо
-    buttons_matrix = []
-    for c in range(FIELD_COLUMNS):
-        row = []
-        for r in range(FIELD_ROWS):
-            action = partial(button_click, (field_obj, c,r))
-            button = tk.Button(root, text=str(field_obj.matrix[c][r].value), command=action, highlightbackground='#3E4149')
-            button.grid(row=r, column=c, sticky=tk.NW+tk.NE+tk.SW+tk.SE+tk.W+tk.E+tk.N+tk.S)
-            row.append(button)
-        buttons_matrix.append(row)
+    
     root.mainloop()
     
 
