@@ -6,6 +6,14 @@ WIDTH = 600
 HEIGHT = 600
 root = tk.Tk()
 
+#TODO Проверить, чтоб все цвета существовали в tkinter
+#TODO проверка на окончание игры (победа, проигрыш)
+#TODO открытие всех бомб после окончания игры
+#TODO фильтрация на первый ход (БОМБА)
+#TODO выставление игроком флагов и вопросов
+#TODO введение счета
+#TODO сброс игры
+
 class Cell:
     """Класс клетки на поле"""
     
@@ -53,7 +61,7 @@ class Field:
         #Логика расстановки бомб на игровом поле
         bomb_counter = 0
         #TODO ПОМЕНЯТЬ
-        while bomb_counter < (5):
+        while bomb_counter < (self.n + self.m):
             x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
             #Если выбранная клетка не бомба, то она станет бомбой
             if not matrix[x_coord][y_coord].isbomb:
@@ -85,7 +93,6 @@ class Field:
 
         self.synchronizer()
 
-    #TODO Посмотреть на адекватонсть реализации 
     def recursion_clicker(self, x, y, first_flag=True):
         """Рекурсивное раскрытитие соседних ячеек"""
         #Проверка на выход из диапазона
@@ -101,18 +108,12 @@ class Field:
 
         #Если значение этой ячейки 0, то запускаем рекурсия
         if self.matrix[x][y].value == 0:
+            for a in range(3):
+                for b in range(3):
+                    self.recursion_clicker(x-1+a, y-1+b, False)
 
-            #TODO Кажется я не охватил весь диапазон
-            self.recursion_clicker(x-1, y, False)
-            self.recursion_clicker(x-1, y+1, False)
-            self.recursion_clicker(x-1, y-1, False)
-
-            self.recursion_clicker(x+1, y, False)
-            self.recursion_clicker(x+1, y+1, False)
-            self.recursion_clicker(x+1, y-1, False)
         else:
             return
-
 
     def generation(self):
         """Генерация основной матрицы"""
@@ -140,17 +141,16 @@ class Field:
     
     def synchronizer(self):
         """Синхронизация значений в self.matrix с buttons_matrix"""
-        #TODO Проверить, чтоб все цвета существовали в tkinter
         number2color_dict = {
             "0" : "white",
             "1" : "blue2",
             "2" : "green2",
             "3" : "red2",
-            "4" : "cyan",
+            "4" : "cyan", #темно-синий
             "5" : "red4",
-            "6" : "purple1",
-            "7" : "yellow",
-            "8" : "magenta2",
+            "6" : "purple1", #аква
+            "7" : "yellow", #фиол
+            "8" : "magenta2",#черный
             "*" : "black",
         }
         for c in range(self.n):
@@ -174,11 +174,10 @@ class Field:
 def main():
     
     #Инициализация канваса
-    c = tk.Canvas(root, width=WIDTH, heigh=HEIGHT)
     root.title("Сапёр")
 
     #Экземпляр игрового поля
-    field_obj = Field(10,10)
+    field_obj = Field(20,20)
     print(field_obj)
     
     root.mainloop()
