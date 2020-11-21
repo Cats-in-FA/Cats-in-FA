@@ -55,7 +55,7 @@ class Field:
 
         #Логика расстановки бомб на игровом поле
         bomb_counter = 0
-        while bomb_counter < (self.n + self.m):
+        while bomb_counter < (3):
             x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
             #Если выбранная клетка не бомба, то она станет бомбой
             if not matrix[x_coord][y_coord].isbomb:
@@ -80,7 +80,31 @@ class Field:
         """Обработка нажатия на button на уровне tkinter"""
         x, y = coords
         self.matrix[x][y].click()
+
+        #TODO Если значение ячейки 0, то раскрываем соседние ячейки до тех пор, пока не до дойдем до ячейки с числом
+        if self.matrix[x][y].value == 0:
+            self.recursion_clicker(x, y)
+
         self.synchronizer()
+
+    def recursion_clicker(self, x, y):
+        """Рекурсивное раскрытитие соседних ячеек"""
+        try:
+            self.matrix[x][y].click()
+        except IndexError:
+            return
+
+        if self.matrix[x][y].value == 0:
+            self.recursion_clicker(x-1, y)
+            self.recursion_clicker(x-1, y+1)
+            self.recursion_clicker(x-1, y-1)
+
+            self.recursion_clicker(x+1, y)
+            self.recursion_clicker(x+1, y+1)
+            self.recursion_clicker(x+1, y-1)
+        else:
+            return
+
 
     def generation(self):
         """Генерация основной матрицы"""
