@@ -6,7 +6,6 @@ WIDTH = 600
 HEIGHT = 600
 root = tk.Tk()
 
-#TODO Проверить, чтоб все цвета существовали в tkinter
 #TODO проверка на окончание игры (победа, проигрыш)
 #TODO открытие всех бомб после окончания игры
 #TODO фильтрация на первый ход (БОМБА)
@@ -38,7 +37,7 @@ class Cell:
     def isbomb(self, value):
         """Выставление бомбы"""
         self._isbomb = value
-        self.value = "•"
+        self.value = "x"
 
 class Field:
     """Класс игрового поля"""
@@ -150,8 +149,8 @@ class Field:
             "5" : "red4",
             "6" : "turquoise4", #аква
             "7" : "dark orchid", #фиолетовый
-            "8" : "black",
-            "•" : "black",
+            "8" : "dark slate blue",
+            "x" : "black",
         }
         for c in range(self.n):
             for r in range(self.m):
