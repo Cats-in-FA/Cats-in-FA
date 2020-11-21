@@ -2,16 +2,14 @@ import tkinter as tk
 from functools import partial
 import random
 #Разрешение окна
-WIDTH = 750
-HEIGHT = 750
-FIELD_ROWS = 10
-FIELD_COLUMNS = 10
+WIDTH = 600
+HEIGHT = 600
 root = tk.Tk()
 
 class Cell:
     """Класс клетки на поле"""
     
-    def __init__(self, x, y) -> None:
+    def __init__(self, x, y):
         self.x = x
         self.y = y
 
@@ -48,6 +46,7 @@ class Field:
         self.generation()
         self.filler()
         self.buttonsmatrix_generation()
+        self.synchronizer()
 
     def filler(self):
         """Заполнение матрицы данными"""
@@ -95,13 +94,14 @@ class Field:
 
     def buttonsmatrix_generation(self):
         """Генерация матрицы buttonов"""
+
         buttons_matrix = []
-        for c in range(FIELD_COLUMNS):
+        for c in range(self.n):
             row = []
-            for r in range(FIELD_ROWS):
+            for r in range(self.m):
                 action = partial(self.button_clicker, (c,r))
-                button = tk.Button(root, text=str(self.matrix[c][r].value), command=action, highlightbackground='#3E4149')
-                button.grid(row=r, column=c, sticky=tk.NW+tk.NE+tk.SW+tk.SE+tk.W+tk.E+tk.N+tk.S)
+                button = tk.Button(root, text=str(self.matrix[c][r].value), height = 1, width = 1, compound="center", command=action, highlightbackground='#3E4149')
+                button.grid(row=r, column=c)
                 row.append(button)
             buttons_matrix.append(row)
         self.buttons_matrix = buttons_matrix
@@ -110,7 +110,14 @@ class Field:
     def synchronizer(self):
         """Синхронизация значений в self.matrix с buttons_matrix"""
         print("Запустили синхронизацию")
-        pass
+        for c in range(self.n):
+            for r in range(self.m):
+                #Если нет нажатия на button - значение неизвестно
+                if not self.matrix[c][r].isclicked:
+                    self.buttons_matrix[c][r].config(text=" ")
+                else:
+                    value = self.matrix[c][r].value
+                    self.buttons_matrix[c][r].config(text=str(value), fg='red', bg='white')
         
 
     def __str__(self):
@@ -127,9 +134,10 @@ def main():
     #Инициализация канваса
     c = tk.Canvas(root, width=WIDTH, heigh=HEIGHT)
     root.title("Сапёр")
+    root.geometry('600x600')
 
     #Экземпляр игрового поля
-    field_obj = Field(FIELD_COLUMNS,FIELD_ROWS)
+    field_obj = Field(10,10)
     print(field_obj)
     
     root.mainloop()
