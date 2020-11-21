@@ -18,12 +18,9 @@ class Cell:
         self.value = None
         self.isclicked = False
 
-    #TODO
     def click(self):
         """Обработка нажатия на кнопку"""
         self.isclicked = True
-        print("На меня нажали")
-        print("Мои координаты: {}, {}".format(self.x, self.y))
 
     @property
     def isbomb(self):
@@ -45,7 +42,7 @@ class Field:
         self.buttons_matrix = None
         self.generation()
         self.filler()
-        self.buttonsmatrix_generation()
+        self.buttonsmatrix_filler()
         self.synchronizer()
 
     def filler(self):
@@ -82,27 +79,37 @@ class Field:
         x, y = coords
         self.matrix[x][y].click()
 
-        #TODO Если значение ячейки 0, то раскрываем соседние ячейки до тех пор, пока не до дойдем до ячейки с числом
+        # Если значение ячейки 0, то раскрываем соседние ячейки до тех пор, пока не до дойдем до ячейки с числом
         if self.matrix[x][y].value == 0:
             self.recursion_clicker(x, y)
 
         self.synchronizer()
 
-    def recursion_clicker(self, x, y):
+    #TODO Посмотреть на адекватонсть реализации 
+    def recursion_clicker(self, x, y, first_flag=True):
         """Рекурсивное раскрытитие соседних ячеек"""
-        try:
-            self.matrix[x][y].click()
-        except IndexError:
+        #Проверка на выход из диапазона
+        if x > self.n-1 or x < 0 or y > self.m-1 or y < 0:
             return
-        print(self.matrix[x][y].value)
-        if self.matrix[x][y].value == 0:
-            self.recursion_clicker(x-1, y)
-            self.recursion_clicker(x-1, y+1)
-            self.recursion_clicker(x-1, y-1)
 
-            self.recursion_clicker(x+1, y)
-            self.recursion_clicker(x+1, y+1)
-            self.recursion_clicker(x+1, y-1)
+        #Если уже кликнули на эту ячейку и это не 1 итерация - выходим
+        if not first_flag and self.matrix[x][y].isclicked:
+            return
+       
+        #Раскрываем ячейку
+        self.matrix[x][y].click()
+
+        #Если значение этой ячейки 0, то запускаем рекурсия
+        if self.matrix[x][y].value == 0:
+
+            #TODO Кажется я не охватил весь диапазон
+            self.recursion_clicker(x-1, y, False)
+            self.recursion_clicker(x-1, y+1, False)
+            self.recursion_clicker(x-1, y-1, False)
+
+            self.recursion_clicker(x+1, y, False)
+            self.recursion_clicker(x+1, y+1, False)
+            self.recursion_clicker(x+1, y-1, False)
         else:
             return
 
@@ -117,7 +124,7 @@ class Field:
             matrix.append(buf_matrix)
         self.matrix = matrix
 
-    def buttonsmatrix_generation(self):
+    def buttonsmatrix_filler(self):
         """Генерация матрицы buttonов"""
 
         buttons_matrix = []
@@ -126,12 +133,11 @@ class Field:
             for r in range(self.m):
                 action = partial(self.button_clicker, (c,r))
                 button = tk.Button(root, text=str(self.matrix[c][r].value), command=action)
-                button.grid(row=r, column=c)
+                button.grid(row=c, column=r)
                 row.append(button)
             buttons_matrix.append(row)
         self.buttons_matrix = buttons_matrix
     
-    #TODO
     def synchronizer(self):
         """Синхронизация значений в self.matrix с buttons_matrix"""
         #TODO Проверить, чтоб все цвета существовали в tkinter
