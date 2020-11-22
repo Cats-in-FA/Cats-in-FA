@@ -50,7 +50,7 @@ class Field:
         self.n = n
         self.m = m
         self.first_click = True
-        self.flags_count = n+m
+        self.flags_count = 4
 
         self.matrix = None
         self.buttons_matrix = None
@@ -84,7 +84,8 @@ class Field:
                     for a in range(3):
                         for b in range(3):
                             if (0<=(i-1+a)<self.n) and (0<=(j-1+b)<self.m) and (matrix[i-1+a][j-1+b].isbomb):
-                                buf_value+=1 #Если клетка внутри поля и это бомба, то считаем
+                                #Если клетка внутри поля и это бомба, то прибавляем значение
+                                buf_value += 1
                     matrix[i][j].value = buf_value
         
         self.matrix = matrix
@@ -131,10 +132,24 @@ class Field:
         self.win_check()
 
     def win_check(self):
-        """Проверка на победу в игре"""  
         print("**Проверка на победу в игре**")
+
+        iswin = True
+        #Если осталось 0 флагов у пользователя
+        if self.flags_count == 0:
+            #Проверяем, чтоб каждая бомба на поле была помечена флагом
+            for i in range(self.n):
+                for j in range(self.m):
+                    #Если хотя бы одна бомба не отмечена флагом - выигрыша нет
+                    if self.matrix[i][j].isbomb and not self.matrix[i][j].isflag:
+                        iswin = False
+        else:
+            iswin = False
         
-    
+        #Елси все хорошо - вызываем победу
+        if iswin:
+            self.win_logic()
+        
     def win_logic(self):
         """Действия при победе в игре"""
         message = messagebox.askquestion(title="Выигрыш", message="Вы выиграли!\nХотите перезапустить игру?")
@@ -179,10 +194,10 @@ class Field:
 
     def bombs_opening(self):
         """Раскрытие всех бомб на поле"""
-        for x in range(self.n):
-            for y in range(self.m):
-                if self.matrix[x][y].isbomb:
-                    self.matrix[x][y].click()
+        for i in range(self.n):
+            for j in range(self.m):
+                if self.matrix[i][j].isbomb:
+                    self.matrix[i][j].click()
 
     def generation(self):
         """Генерация основной матрицы"""
