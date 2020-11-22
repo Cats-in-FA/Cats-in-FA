@@ -99,6 +99,7 @@ class Field:
         if self.first_click:
             self.filler(x, y)
             self.first_click = False
+            print(self)
         
         self.matrix[x][y].click()
 
@@ -106,8 +107,7 @@ class Field:
         if self.matrix[x][y].value == 0:
             self.recursion_clicker(x, y)
         elif self.matrix[x][y].isclicked and self.matrix[x][y].value == "x":
-            self.bombs_opening()
-            # TODO конец игры
+            self.lose_logic()
 
         self.synchronizer()
 
@@ -124,8 +124,22 @@ class Field:
             self.flags_count -= 1
             self.matrix[x][y].isflag=True
         self.synchronizer()
-        #TODO проверка на победу в игре
-        
+        self.win_check()
+
+    def win_check(self):
+        """Проверка на победу в игре"""  
+        print("**Проверка на победу в игре**")
+    
+    def win_logic(self):
+        """Действия при победе в игре"""
+        pass
+
+    def lose_logic(self):
+        """Действия при проигрыше в игре"""
+        #Открытие всех бомб
+        self.bombs_opening()
+        print("Вы проиграли((")
+    
     def recursion_clicker(self, x, y, first_flag=True):
         """Рекурсивное раскрытитие соседних ячеек"""
         #Проверка на выход из диапазона
@@ -246,6 +260,7 @@ def main():
     #Экземпляр игрового поля
     Field.reloadbutton_click()
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
