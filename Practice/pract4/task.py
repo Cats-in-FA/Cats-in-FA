@@ -4,9 +4,9 @@ from functools import partial
 import random
 root = tk.Tk()
 
-#TODO проверка на окончание игры (победа, проигрыш)
-#Победа - проверка, чтоб кол-во флагов == 0 и были флаги на всех бомбах
-#Поражение - взрыв на бомбе
+COLUMNS = 10
+ROWS = 10
+BOMBS = COLUMNS+ROWS
 
 class Cell:
     """Класс клетки на поле"""
@@ -44,13 +44,13 @@ class Field:
     @staticmethod
     def reloadbutton_click():
         """Обработка нажатия на button перезапуска игры"""
-        return Field(10,10)
+        return Field(COLUMNS,ROWS)
 
     def __init__(self, n, m):
         self.n = n
         self.m = m
         self.first_click = True
-        self.flags_count = 4
+        self.flags_count = BOMBS
 
         self.matrix = None
         self.buttons_matrix = None
