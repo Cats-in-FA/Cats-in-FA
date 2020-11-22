@@ -7,7 +7,7 @@ root = tk.Tk()
 
 COLUMNS = 10
 ROWS = 10
-BOMBS = 4
+BOMBS = (COLUMNS + ROWS)//2
 
 
 class Cell:
@@ -113,7 +113,6 @@ class Field:
         if self.first_click:
             self.filler(x, y)
             self.first_click = False
-            print(self)
 
         self.matrix[x][y].click()
 
@@ -133,19 +132,18 @@ class Field:
         """Обработка выставляения флага/вопроса на button"""
         x, y = coords
         if self.matrix[x][y].isflag:
-            self.flags_count += 1
             self.matrix[x][y].isflag = False
             self.matrix[x][y].isquestion = True
+            self.flags_count += 1
         elif self.matrix[x][y].isquestion:
             self.matrix[x][y].isquestion = False
         else:
-            self.flags_count -= 1
             self.matrix[x][y].isflag = True
+            self.flags_count -= 1
         self.synchronizer()
         self.win_check()
 
     def win_check(self):
-        print("**Проверка на победу в игре**")
 
         iswin = True
         # Если осталось 0 флагов у пользователя
@@ -220,6 +218,7 @@ class Field:
         for i in range(self.n):
             for j in range(self.m):
                 if self.matrix[i][j].isbomb:
+                    self.matrix[i][j].isflag = False
                     self.matrix[i][j].click()
 
     def generation(self):
@@ -304,16 +303,6 @@ class Field:
                     )
 
         self.point_label.config(text=str(self.flags_count))
-
-    # TODO Как закончим - снести ето
-    def __str__(self):
-        """Вывод матрицы на экран"""
-        matrix = self.matrix
-        for i in range(self.n):
-            for j in range(self.m):
-                print(matrix[i][j].value, end=" ")
-            print("")
-        return ""
 
 
 def main():
