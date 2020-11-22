@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from functools import partial
 import random
 root = tk.Tk()
@@ -106,8 +107,11 @@ class Field:
         # Если значение ячейки 0, то раскрываем соседние ячейки до тех пор, пока не до дойдем до ячейки с числом
         if self.matrix[x][y].value == 0:
             self.recursion_clicker(x, y)
+
+        #Проверка на поражение
         elif self.matrix[x][y].isclicked and self.matrix[x][y].value == "x":
             self.lose_logic()
+            return
 
         self.synchronizer()
 
@@ -129,17 +133,28 @@ class Field:
     def win_check(self):
         """Проверка на победу в игре"""  
         print("**Проверка на победу в игре**")
+        
     
     def win_logic(self):
         """Действия при победе в игре"""
-        pass
+        message = messagebox.askquestion(title="Выигрыш", message="Вы выиграли!\nХотите перезапустить игру?")
+        if message == 'no':
+            root.quit()
+        else:
+            Field.reloadbutton_click()
 
     def lose_logic(self):
         """Действия при проигрыше в игре"""
         #Открытие всех бомб
         self.bombs_opening()
-        print("Вы проиграли((")
-    
+        self.synchronizer()
+
+        message = messagebox.askquestion(title="Проигрыш", message="Вы проиграли\nХотите перезапустить игру?")
+        if message == 'no':
+            root.quit()
+        else:
+            Field.reloadbutton_click()
+
     def recursion_clicker(self, x, y, first_flag=True):
         """Рекурсивное раскрытитие соседних ячеек"""
         #Проверка на выход из диапазона
