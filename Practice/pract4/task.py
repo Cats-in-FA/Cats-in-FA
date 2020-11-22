@@ -6,7 +6,7 @@ root = tk.Tk()
 
 COLUMNS = 10
 ROWS = 10
-BOMBS = COLUMNS+ROWS
+BOMBS = 4
 
 class Cell:
     """Класс клетки на поле"""
@@ -115,6 +115,7 @@ class Field:
             return
 
         self.synchronizer()
+        self.win_check()
 
     def matrixbutton_rightclick(self, coords, event):
         """Обработка выставляения флага/вопроса на button"""
@@ -137,16 +138,22 @@ class Field:
         iswin = True
         #Если осталось 0 флагов у пользователя
         if self.flags_count == 0:
+            
             #Проверяем, чтоб каждая бомба на поле была помечена флагом
             for i in range(self.n):
                 for j in range(self.m):
+
                     #Если хотя бы одна бомба не отмечена флагом - выигрыша нет
                     if self.matrix[i][j].isbomb and not self.matrix[i][j].isflag:
+                        iswin = False
+                    
+                    #Если это не бомба и она не открыта - выигрыша нет
+                    if not self.matrix[i][j].isbomb and not self.matrix[i][j].isclicked:
                         iswin = False
         else:
             iswin = False
         
-        #Елси все хорошо - вызываем победу
+        #Если все хорошо - вызываем победу
         if iswin:
             self.win_logic()
         
