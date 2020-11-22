@@ -4,7 +4,8 @@ import random
 root = tk.Tk()
 
 #TODO проверка на окончание игры (победа, проигрыш)
-#TODO ведение счета
+#Победа - проверка, чтоб кол-во флагов == 0 и были флаги на всех бомбах
+#Поражение - взрыв на бомбе
 
 class Cell:
     """Класс клетки на поле"""
@@ -48,23 +49,25 @@ class Field:
         self.n = n
         self.m = m
         self.first_click = True
+        self.flags_count = n+m
 
         self.matrix = None
         self.buttons_matrix = None
+        self.point_label = None
 
         self.generation()
         self.buttonsmatrix_filler()
         self.synchronizer()
 
-    def filler(self, coords=()):
+    def filler(self, x_first, y_first):
         """Заполнение матрицы данными"""
-        x_first, y_first = coords
+
         matrix = self.matrix
 
         #Логика расстановки бомб на игровом поле
         bomb_counter = 0
 
-        while bomb_counter < (self.n+self.m):
+        while bomb_counter < self.flags_count:
             x_coord, y_coord = random.randint(0, self.n-1), random.randint(0, self.m-1)
             #Если выбранная клетка не бомба, то она станет бомбой
             if (not matrix[x_coord][y_coord].isbomb) and (x_coord != x_first) and (y_coord != y_first):
@@ -86,12 +89,17 @@ class Field:
         self.matrix = matrix
 
     def matrixbutton_leftclick(self, coords, event):
-        """Обработка нажатия на button"""
+        """
+        Обработка нажатия на button
+        При первом нажатии вызывает self.filler
+        """
+        x, y = coords
+
         # Если первое нажатие
         if self.first_click:
-            self.filler(coords)
+            self.filler(x, y)
             self.first_click = False
-        x, y = coords
+        
         self.matrix[x][y].click()
 
         # Если значение ячейки 0, то раскрываем соседние ячейки до тех пор, пока не до дойдем до ячейки с числом
@@ -107,14 +115,17 @@ class Field:
         """Обработка выставляения флага/вопроса на button"""
         x, y = coords
         if self.matrix[x][y].isflag:
+            self.flags_count += 1
             self.matrix[x][y].isflag=False
             self.matrix[x][y].isquestion=True
         elif self.matrix[x][y].isquestion:
             self.matrix[x][y].isquestion=False
         else:
+            self.flags_count -= 1
             self.matrix[x][y].isflag=True
         self.synchronizer()
-
+        #TODO проверка на победу в игре
+        
     def recursion_clicker(self, x, y, first_flag=True):
         """Рекурсивное раскрытитие соседних ячеек"""
         #Проверка на выход из диапазона
@@ -173,13 +184,13 @@ class Field:
                 row.append(button)
             buttons_matrix.append(row)
 
-            label1 = tk.Label(text="Ваш счёт:")
-            label2 = tk.Label(text="Ваш счёт:")
+            label1 = tk.Label(text="Флаги:")
+            self.point_label = tk.Label(text=str(self.flags_count))
             reload_button = tk.Button(root, text="Перезапуск", command=Field.reloadbutton_click)
 
             #Привязка прочих элементов к сетке
             label1.grid(row=1, column=0)
-            label2.grid(row=2, column=0)
+            self.point_label.grid(row=2, column=0)
 
             reload_button.grid(row=self.n, column=0)
         self.buttons_matrix = buttons_matrix
@@ -202,17 +213,24 @@ class Field:
             for r in range(self.m):
                 #Если нет нажатия на button - значение неизвестно
                 if not self.matrix[c][r].isclicked:           
-                    self.buttons_matrix[c][r].config(text="    ")
-                    #Если мы поставили флаг или вопрос
+                    
+                    #Если мы выставили флаг
                     if self.matrix[c][r].isflag:
                         self.buttons_matrix[c][r].config(text=" F ")
+                    #Если мы выставили вопрос
                     elif self.matrix[c][r].isquestion:
                         self.buttons_matrix[c][r].config(text=" ? ")
+                    else:
+                        self.buttons_matrix[c][r].config(text="    ")
+
                 #Если нажали на кнопку
                 else:
                     value = self.matrix[c][r].value
                     self.buttons_matrix[c][r].config(text=" {} ".format(str(value).replace("0", "  ")), disabledforeground=number2color_dict[str(value)], state=tk.DISABLED, bg="#b8b8b8", relief="flat")
 
+        self.point_label.config(text=str(self.flags_count))
+
+    #TODO Как закончим - снести ето
     def __str__(self):
         """Вывод матрицы на экран"""
         matrix = self.matrix
