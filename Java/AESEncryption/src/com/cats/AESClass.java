@@ -7,10 +7,10 @@ package com.cats;
 
 public class AESClass {
 
-    private int nb = 4; // number of coloumn of State (for AES = 4)
-    private int nr = 10;  // number of rounds ib ciper cycle (if nb = 4 nr = 10)
-    private int nk = 4;  // the key length (in 32-bit words)
-    public AESClass(){
+    private int nb = 4; //число столбцов (32-х битных слов), составляющих State. Для стандарта регламентировано Nb = 4
+    private int nr = 10;  //количество раундов шифрования. В зависимости от длины ключа, Nr = 10, 12 или 14
+    private int nk = 4;  //длина ключа в 32-х битных словах. Для AES, Nk = 4, 6, 8. Мы уже определились, что будем использовать Nk = 4
+    public AESClass(byte[] key){
 
         //# This dict will be used in SubBytes().
         //Словарь для SubBytes();
