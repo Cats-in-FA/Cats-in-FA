@@ -14,12 +14,12 @@ public class Main {
         byte[] key = KeyString.getBytes();
 
         AESClass obj = new AESClass(key);
-
-        String CatResultEncrypt = new String(obj.ECB_decrypt(obj.ECB_encrypt(inputText)), StandardCharsets.UTF_8);
+        byte[] encrypt = obj.Encrypt(inputText);
+        String CatResultEncrypt = new String(encrypt, StandardCharsets.UTF_8);
         System.out.println("Шифровка: " + CatResultEncrypt);
 
-        //String CatResultDecrypt = new String(obj.ECB_decrypt(CatResultEncrypt.getBytes()), StandardCharsets.UTF_8);
-        //System.out.println("Расшифровка: "+CatResultDecrypt);
-
+        byte[] decrypt = obj.Decrypt(encrypt);
+        String CatResultDecrypt = new String(decrypt, StandardCharsets.UTF_8);
+        System.out.println("Расшифровка: "+CatResultDecrypt);
     }
 }

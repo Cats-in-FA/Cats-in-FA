@@ -7,7 +7,10 @@ import java.util.Arrays;
 /*
 Разработать программу шифровки-дешифровки по алгоритму AES-128.
 Данные берутся из файла, зашифрованные данные сохраняются в указанный файл.
+
+Использует режим электронной кодовой книги/Electronic Codebook/ECB
  */
+
 
 public class AESClass {
 
@@ -84,8 +87,9 @@ public class AESClass {
             0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd,
             0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d};
 
-
+    //Конструктор
     public AESClass(byte[] key) {
+
         //Ключ
         this.key = new int[key.length];
 
@@ -98,19 +102,53 @@ public class AESClass {
         //3-х мерный т.к. нам требуется хранить несколько состояний (2 номера состояния)
         state = new int[2][4][Nb];
 
+        // Key expansion
+        KeyExpansion();
+
+    }
+
+    private int[] KeyExpansion() {
+
+        int temp, i = 0;
         // The storage vector for the expansion of the key creation.
         w = new int[Nb * (Nr + 1)];
 
-        // Key expansion
-        expandKey();
-
+        while (i < Nk) {
+            w[i] = 0x00000000;
+            w[i] |= key[4 * i] << 24;
+            w[i] |= key[4 * i + 1] << 16;
+            w[i] |= key[4 * i + 2] << 8;
+            w[i] |= key[4 * i + 3];
+            i++;
+        }
+        i = Nk;
+        while (i < Nb * (Nr + 1)) {
+            temp = w[i - 1];
+            if (i % Nk == 0) {
+                // apply an XOR with a constant round rCon.
+                temp = subWord(rotWord(temp)) ^ (rCon[i / Nk] << 24);
+            } else if (Nk > 6 && (i % Nk == 4)) {
+                temp = subWord(temp);
+            } else {
+            }
+            w[i] = w[i - Nk] ^ temp;
+            i++;
+        }
+        return w;
     }
 
     // The 128 bits of a state are an XOR offset applied to them with the 128 bits of the key expended.
     // s: state matrix that has Nb columns and 4 rows.
     // Round: A round of the key w to be added.
     // s: returns the addition of the key per round
-    private int[][] addRoundKey(int[][] s, int round) {
+
+    /*
+    Трансформация производит побитовый XOR каждого элемента из State с
+    соответствующим элементом из RoundKey.
+    RoundKey — массив такого же размера, как и State, который строится для каждого
+    раунда на основе секретного ключа функцией KeyExpansion()
+     */
+    private int[][] AddRoundKey(int[][] s, int round) {
         for (int c = 0; c < Nb; c++) {
             for (int r = 0; r < 4; r++) {
                 s[r][c] = s[r][c] ^ ((w[round * Nb + c] << (r * 8)) >>> 24);
@@ -127,17 +165,17 @@ public class AESClass {
             }
         }
         actual = 0;
-        addRoundKey(out, actual);
+        AddRoundKey(out, actual);
 
         for (actual = 1; actual < Nr; actual++) {
             subBytes(out);
             shiftRows(out);
             mixColumns(out);
-            addRoundKey(out, actual);
+            AddRoundKey(out, actual);
         }
         subBytes(out);
         shiftRows(out);
-        addRoundKey(out, actual);
+        AddRoundKey(out, actual);
         return out;
     }
 
@@ -148,17 +186,17 @@ public class AESClass {
             }
         }
         actual = Nr;
-        addRoundKey(out, actual);
+        AddRoundKey(out, actual);
 
         for (actual = Nr - 1; actual > 0; actual--) {
-            invShiftRows(out);
-            invSubBytes(out);
-            addRoundKey(out, actual);
+            InvShiftRows(out);
+            InvSubBytes(out);
+            AddRoundKey(out, actual);
             invMixColumnas(out);
         }
-        invShiftRows(out);
-        invSubBytes(out);
-        addRoundKey(out, actual);
+        InvShiftRows(out);
+        InvSubBytes(out);
+        AddRoundKey(out, actual);
         return out;
 
     }
@@ -166,9 +204,7 @@ public class AESClass {
     // Main cipher/decipher helper-methods (for 128-bit plain/cipher text in,
     // and 128-bit cipher/plain text out) produced by the encryption algorithm.
     private byte[] encrypt(byte[] text) {
-        if (text.length != 16) {
-            throw new IllegalArgumentException("Only 16-byte blocks can be encrypted");
-        }
+
         byte[] out = new byte[text.length];
 
         for (int i = 0; i < Nb; i++) { // columns
@@ -187,9 +223,6 @@ public class AESClass {
     }
 
     private byte[] decrypt(byte[] text) {
-        if (text.length != 16) {
-            throw new IllegalArgumentException("Only 16-byte blocks can be encrypted");
-        }
         byte[] out = new byte[text.length];
 
         for (int i = 0; i < Nb; i++) { // columns
@@ -225,7 +258,7 @@ public class AESClass {
         return state;
     }
 
-    private int[][] invShiftRows(int[][] state) {
+    private int[][] InvShiftRows(int[][] state) {
         int temp1, temp2, temp3, i;
 
         // row 1;
@@ -257,7 +290,7 @@ public class AESClass {
     }
 
 
-    private int[][] invSubBytes(int[][] state) {
+    private int[][] InvSubBytes(int[][] state) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < Nb; j++) {
                 state[i][j] = invSubWord(state[i][j]) & 0xFF;
@@ -274,32 +307,6 @@ public class AESClass {
             subWord |= rsBox[in] << (24 - i);
         }
         return subWord;
-    }
-
-    private int[] expandKey() {
-        int temp, i = 0;
-        while (i < Nk) {
-            w[i] = 0x00000000;
-            w[i] |= key[4 * i] << 24;
-            w[i] |= key[4 * i + 1] << 16;
-            w[i] |= key[4 * i + 2] << 8;
-            w[i] |= key[4 * i + 3];
-            i++;
-        }
-        i = Nk;
-        while (i < Nb * (Nr + 1)) {
-            temp = w[i - 1];
-            if (i % Nk == 0) {
-                // apply an XOR with a constant round rCon.
-                temp = subWord(rotWord(temp)) ^ (rCon[i / Nk] << 24);
-            } else if (Nk > 6 && (i % Nk == 4)) {
-                temp = subWord(temp);
-            } else {
-            }
-            w[i] = w[i - Nk] ^ temp;
-            i++;
-        }
-        return w;
     }
 
     private int[][] mixColumns(int[][] state) {
@@ -396,6 +403,7 @@ public class AESClass {
         return (b << 1) ^ 0x11b;
     }
 
+    //Реализация xor для мат.операции
     private static byte[] xor(byte[] a, byte[] b) {
         byte[] result = new byte[Math.min(a.length, b.length)];
         for (int j = 0; j < result.length; j++) {
@@ -405,8 +413,8 @@ public class AESClass {
         return result;
     }
 
-    // Public methods
-    public byte[] ECB_encrypt(byte[] text) {
+    //TODO Переделать без входных аргументов
+    public byte[] Encrypt(byte[] text) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (int i = 0; i < text.length; i+=16) {
             try {
@@ -418,8 +426,10 @@ public class AESClass {
         return out.toByteArray();
     }
 
-    public byte[] ECB_decrypt(byte[] text) {
+    //TODO Переделать без входных аргументов
+    public byte[] Decrypt(byte[] text) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        //Едем по 16
         for (int i = 0; i < text.length; i+=16) {
             try {
                 out.write(decrypt(Arrays.copyOfRange(text, i, i + 16)));
