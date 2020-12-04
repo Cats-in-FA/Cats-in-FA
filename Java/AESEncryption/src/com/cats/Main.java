@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         //TODO Тут сделать файлы
 
-        String InputString = "MEOW";
+        String InputString = "Я кошка и у меня урчит живот";
         String KeyString = "3fed2c8817f0903a3fe007de83bac6dc";
         byte[] inputText = InputString.getBytes();
         byte[] key = KeyString.getBytes();

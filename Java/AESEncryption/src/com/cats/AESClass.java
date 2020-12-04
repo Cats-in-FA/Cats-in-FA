@@ -24,10 +24,10 @@ public class AESClass {
     // Состояние
     private int[][][] state;
 
+    //Вектор для преобразования ключа в ключ-матрицу в KeyExpansion
+    private int[] vExpansion;
     // Ключ
-    private int[] w;
     private int[] key;
-
 
     // Матрица для шифровки
     private static int[] sBox = new int[]{
@@ -87,43 +87,41 @@ public class AESClass {
             0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd,
             0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d};
 
-    //Конструктор
     public AESClass(byte[] key) {
 
         //Ключ
         this.key = new int[key.length];
 
         //Выставление данных для ключа
-        for (int i = 0; i < key.length; i++) {
+        for (int i = 0; i < key.length; i++)
             this.key[i] = key[i];
-        }
 
         //Создание массива хранения для состояний
         //3-х мерный т.к. нам требуется хранить несколько состояний (2 номера состояния)
         state = new int[2][4][Nb];
 
-        // Key expansion
+        //Делает из ключа-строки ключ-матрицу
         KeyExpansion();
-
     }
 
+    //Метод для преобразования ключа-строки в ключ-матрицу
     private int[] KeyExpansion() {
 
         int temp, i = 0;
         // The storage vector for the expansion of the key creation.
-        w = new int[Nb * (Nr + 1)];
+        vExpansion = new int[Nb * (Nr + 1)];
 
         while (i < Nk) {
-            w[i] = 0x00000000;
-            w[i] |= key[4 * i] << 24;
-            w[i] |= key[4 * i + 1] << 16;
-            w[i] |= key[4 * i + 2] << 8;
-            w[i] |= key[4 * i + 3];
+            vExpansion[i] = 0x00000000;
+            vExpansion[i] |= key[4 * i] << 24;
+            vExpansion[i] |= key[4 * i + 1] << 16;
+            vExpansion[i] |= key[4 * i + 2] << 8;
+            vExpansion[i] |= key[4 * i + 3];
             i++;
         }
         i = Nk;
         while (i < Nb * (Nr + 1)) {
-            temp = w[i - 1];
+            temp = vExpansion[i - 1];
             if (i % Nk == 0) {
                 // apply an XOR with a constant round rCon.
                 temp = subWord(rotWord(temp)) ^ (rCon[i / Nk] << 24);
@@ -131,15 +129,15 @@ public class AESClass {
                 temp = subWord(temp);
             } else {
             }
-            w[i] = w[i - Nk] ^ temp;
+            vExpansion[i] = vExpansion[i - Nk] ^ temp;
             i++;
         }
-        return w;
+        return vExpansion;
     }
 
     // The 128 bits of a state are an XOR offset applied to them with the 128 bits of the key expended.
     // s: state matrix that has Nb columns and 4 rows.
-    // Round: A round of the key w to be added.
+    // Round: A round of the key vExpansion to be added.
     // s: returns the addition of the key per round
 
     /*
@@ -151,7 +149,7 @@ public class AESClass {
     private int[][] AddRoundKey(int[][] s, int round) {
         for (int c = 0; c < Nb; c++) {
             for (int r = 0; r < 4; r++) {
-                s[r][c] = s[r][c] ^ ((w[round * Nb + c] << (r * 8)) >>> 24);
+                s[r][c] = s[r][c] ^ ((vExpansion[round * Nb + c] << (r * 8)) >>> 24);
             }
         }
         return s;
@@ -258,6 +256,7 @@ public class AESClass {
         return state;
     }
 
+
     private int[][] InvShiftRows(int[][] state) {
         int temp1, temp2, temp3, i;
 
@@ -270,9 +269,11 @@ public class AESClass {
         // row 2
         temp1 = state[2][Nb - 1];
         temp2 = state[2][Nb - 2];
+
         for (i = Nb - 1; i > 1; i--) {
             state[2][i] = state[2][(i - 2) % Nb];
         }
+
         state[2][1] = temp1;
         state[2][0] = temp2;
         // row 3
@@ -291,11 +292,9 @@ public class AESClass {
 
 
     private int[][] InvSubBytes(int[][] state) {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < Nb; j++) {
+        for (int i = 0; i < 4; i++)
+            for (int j = 0; j < Nb; j++)
                 state[i][j] = invSubWord(state[i][j]) & 0xFF;
-            }
-        }
         return state;
     }
 
@@ -439,5 +438,4 @@ public class AESClass {
         }
         return out.toByteArray();
     }
-
 }
