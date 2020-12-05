@@ -2,7 +2,7 @@
 
 <img src="https://github.com/Cat-in-box/Cats-in-FA/blob/png/Pusheen%26Chii.png" align="right" width=400 height=156/>
 
-Сборник совместных заданий в Финансовом Университете @GeorgiyDemo & @Cat-in-box
+Сборник совместных заданий в Финансовом Университете [GeorgiyDemo](https://github.com/GeorgiyDemo) & [Cat-in-box](https://github.com/Cat-in-box)
 
 - Практикум по программированию (Python)
   - [Сапер](https://github.com/Cat-in-box/Cats-in-FA/tree/main/Practice/pract4)
