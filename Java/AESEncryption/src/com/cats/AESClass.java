@@ -135,6 +135,11 @@ public class AESClass {
         return vExpansion;
     }
 
+    private static int rotWord(int word) {
+        return (word << 8) | ((word & 0xFF000000) >>> 24);
+    }
+
+
     // The 128 bits of a state are an XOR offset applied to them with the 128 bits of the key expended.
     // s: state matrix that has Nb columns and 4 rows.
     // Round: A round of the key vExpansion to be added.
@@ -155,7 +160,7 @@ public class AESClass {
         return s;
     }
 
-    // Cipher/Decipher methods
+    // Запуск основных преобразований шифровки
     private int[][] cipher(int[][] in, int[][] out) {
         for (int i = 0; i < in.length; i++) {
             for (int j = 0; j < in.length; j++) {
@@ -177,6 +182,7 @@ public class AESClass {
         return out;
     }
 
+    // Запуск основных преобразований дешифровки
     private int[][] decipher(int[][] in, int[][] out) {
         for (int i = 0; i < in.length; i++) {
             for (int j = 0; j < in.length; j++) {
@@ -199,19 +205,22 @@ public class AESClass {
 
     }
 
-    // Main cipher/decipher helper-methods (for 128-bit plain/cipher text in,
-    // and 128-bit cipher/plain text out) produced by the encryption algorithm.
+    // Общий метод шифровки
     private byte[] encrypt(byte[] text) {
 
         byte[] out = new byte[text.length];
 
-        for (int i = 0; i < Nb; i++) { // columns
-            for (int j = 0; j < 4; j++) { // rows
+        // Заполняем массив State входными значениями по формуле
+        for (int i = 0; i < Nb; i++) { // колонки
+            for (int j = 0; j < 4; j++) { // строки
                 state[0][j][i] = text[i * Nb + j] & 0xff;
             }
         }
 
+        // Запуск основных преобразований
         cipher(state[0], state[1]);
+
+        // Составляем выходной массив зашифрованных байтов из State по формуле
         for (int i = 0; i < Nb; i++) {
             for (int j = 0; j < 4; j++) {
                 out[i * Nb + j] = (byte) (state[1][j][i] & 0xff);
@@ -220,16 +229,20 @@ public class AESClass {
         return out;
     }
 
+    // Общий метод дешифровки
+    // TODO ПО МОЕМУ ЭТО ТО ЖЕ ЧТО И crypter ТОЛЬКО С ВЫЗОВОМ ДРУГОЙ ФУНКЦИИ
     private byte[] decrypt(byte[] text) {
+
         byte[] out = new byte[text.length];
 
-        for (int i = 0; i < Nb; i++) { // columns
-            for (int j = 0; j < 4; j++) { // rows
+        for (int i = 0; i < Nb; i++) { // колонки
+            for (int j = 0; j < 4; j++) { // строки
                 state[0][j][i] = text[i * Nb + j] & 0xff;
             }
         }
 
         decipher(state[0], state[1]);
+
         for (int i = 0; i < Nb; i++) {
             for (int j = 0; j < 4; j++) {
                 out[i * Nb + j] = (byte) (state[1][j][i] & 0xff);
@@ -239,7 +252,102 @@ public class AESClass {
 
     }
 
-    // Algorithm's general methods
+    // Блок основных преобразований для шифрования
+    // Замена каждого байта из State на соответствующий ему из константной таблицы Sbox
+    private int[][] subBytes(int[][] state) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < Nb; j++) {
+                state[i][j] = subWord(state[i][j]) & 0xFF;
+            }
+        }
+        return state;
+    }
+
+    private static int subWord(int word) {
+        int subWord = 0;
+        for (int i = 24; i >= 0; i -= 8) {
+            int in = word << i >>> 24;
+            subWord |= sBox[in] << (24 - i);
+        }
+        return subWord;
+    }
+
+    // Циклический сдвиг влево построчно
+    private int[][] shiftRows(int[][] state) {
+        int temp1, temp2, temp3, i;
+
+        // Строка 1 - сдвиг влево на 1
+        temp1 = state[1][0];
+        for (i = 0; i < Nb - 1; i++) {
+            state[1][i] = state[1][(i + 1) % Nb];
+        }
+        state[1][Nb - 1] = temp1;
+
+        // Строка 2 - сдвиг влево на 2
+        temp1 = state[2][0];
+        temp2 = state[2][1];
+        for (i = 0; i < Nb - 2; i++) {
+            state[2][i] = state[2][(i + 2) % Nb];
+        }
+        state[2][Nb - 2] = temp1;
+        state[2][Nb - 1] = temp2;
+
+        // Строка 3 - сдвиг влево на 3
+        temp1 = state[3][0];
+        temp2 = state[3][1];
+        temp3 = state[3][2];
+        for (i = 0; i < Nb - 3; i++) {
+            state[3][i] = state[3][(i + 3) % Nb];
+        }
+        state[3][Nb - 3] = temp1;
+        state[3][Nb - 2] = temp2;
+        state[3][Nb - 1] = temp3;
+
+        return state;
+    }
+
+    // Каждая колонка в State представляется в виде многочлена и перемножается в поле GF(28)
+    // по модулю x4 + 1 с фиксированным многочленом 3x3 + x2 + x + 2
+    private int[][] mixColumns(int[][] state) {
+        int temp0, temp1, temp2, temp3;
+        for (int c = 0; c < Nb; c++) {
+
+            temp0 = mult(0x02, state[0][c]) ^ mult(0x03, state[1][c]) ^ state[2][c] ^ state[3][c];
+            temp1 = state[0][c] ^ mult(0x02, state[1][c]) ^ mult(0x03, state[2][c]) ^ state[3][c];
+            temp2 = state[0][c] ^ state[1][c] ^ mult(0x02, state[2][c]) ^ mult(0x03, state[3][c]);
+            temp3 = mult(0x03, state[0][c]) ^ state[1][c] ^ state[2][c] ^ mult(0x02, state[3][c]);
+
+            state[0][c] = temp0;
+            state[1][c] = temp1;
+            state[2][c] = temp2;
+            state[3][c] = temp3;
+        }
+
+        return state;
+    }
+
+
+    private static int mult(int a, int b) {
+        int sum = 0;
+        while (a != 0) { // пока не 0
+            if ((a & 1) != 0) { // проверка, является ли 1й бит 1
+                sum = sum ^ b; // добавление b из младшего бита
+            }
+            b = xtime(b); // битовый сдвиг влево по модулю 0x11b при необходимости
+            a = a >>> 1; // был использован младший бит "а", поэтому сдвиньте вправо
+        }
+        return sum;
+
+    }
+
+    private static int xtime(int b) {
+        if ((b & 0x80) == 0) {
+            return b << 1;
+        }
+        return (b << 1) ^ 0x11b;
+    }
+
+    // Блок основных преобразований для дешифрования (обратный порядок)
     private int[][] invMixColumnas(int[][] state) {
         int temp0, temp1, temp2, temp3;
         for (int c = 0; c < Nb; c++) {
@@ -255,7 +363,6 @@ public class AESClass {
         }
         return state;
     }
-
 
     private int[][] InvShiftRows(int[][] state) {
         int temp1, temp2, temp3, i;
@@ -290,14 +397,12 @@ public class AESClass {
         return state;
     }
 
-
     private int[][] InvSubBytes(int[][] state) {
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < Nb; j++)
                 state[i][j] = invSubWord(state[i][j]) & 0xFF;
         return state;
     }
-
 
     private static int invSubWord(int word) {
         int subWord = 0;
@@ -308,109 +413,6 @@ public class AESClass {
         return subWord;
     }
 
-    private int[][] mixColumns(int[][] state) {
-        int temp0, temp1, temp2, temp3;
-        for (int c = 0; c < Nb; c++) {
-
-            temp0 = mult(0x02, state[0][c]) ^ mult(0x03, state[1][c]) ^ state[2][c] ^ state[3][c];
-            temp1 = state[0][c] ^ mult(0x02, state[1][c]) ^ mult(0x03, state[2][c]) ^ state[3][c];
-            temp2 = state[0][c] ^ state[1][c] ^ mult(0x02, state[2][c]) ^ mult(0x03, state[3][c]);
-            temp3 = mult(0x03, state[0][c]) ^ state[1][c] ^ state[2][c] ^ mult(0x02, state[3][c]);
-
-            state[0][c] = temp0;
-            state[1][c] = temp1;
-            state[2][c] = temp2;
-            state[3][c] = temp3;
-        }
-
-        return state;
-    }
-
-    private static int mult(int a, int b) {
-        int sum = 0;
-        while (a != 0) { // while it is not 0
-            if ((a & 1) != 0) { // check if the first bit is 1
-                sum = sum ^ b; // add b from the smallest bit
-            }
-            b = xtime(b); // bit shift left mod 0x11b if necessary;
-            a = a >>> 1; // lowest bit of "a" was used so shift right
-        }
-        return sum;
-
-    }
-
-    private static int rotWord(int word) {
-        return (word << 8) | ((word & 0xFF000000) >>> 24);
-    }
-
-
-    private int[][] shiftRows(int[][] state) {
-        int temp1, temp2, temp3, i;
-
-        // row 1
-        temp1 = state[1][0];
-        for (i = 0; i < Nb - 1; i++) {
-            state[1][i] = state[1][(i + 1) % Nb];
-        }
-        state[1][Nb - 1] = temp1;
-
-        // row 2, moves 1-byte
-        temp1 = state[2][0];
-        temp2 = state[2][1];
-        for (i = 0; i < Nb - 2; i++) {
-            state[2][i] = state[2][(i + 2) % Nb];
-        }
-        state[2][Nb - 2] = temp1;
-        state[2][Nb - 1] = temp2;
-
-        // row 3, moves 2-bytes
-        temp1 = state[3][0];
-        temp2 = state[3][1];
-        temp3 = state[3][2];
-        for (i = 0; i < Nb - 3; i++) {
-            state[3][i] = state[3][(i + 3) % Nb];
-        }
-        state[3][Nb - 3] = temp1;
-        state[3][Nb - 2] = temp2;
-        state[3][Nb - 1] = temp3;
-
-        return state;
-    }
-
-    private int[][] subBytes(int[][] state) {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < Nb; j++) {
-                state[i][j] = subWord(state[i][j]) & 0xFF;
-            }
-        }
-        return state;
-    }
-
-    private static int subWord(int word) {
-        int subWord = 0;
-        for (int i = 24; i >= 0; i -= 8) {
-            int in = word << i >>> 24;
-            subWord |= sBox[in] << (24 - i);
-        }
-        return subWord;
-    }
-
-    private static int xtime(int b) {
-        if ((b & 0x80) == 0) {
-            return b << 1;
-        }
-        return (b << 1) ^ 0x11b;
-    }
-
-    //Реализация xor для мат.операции
-    private static byte[] xor(byte[] a, byte[] b) {
-        byte[] result = new byte[Math.min(a.length, b.length)];
-        for (int j = 0; j < result.length; j++) {
-            int xor = a[j] ^ b[j];
-            result[j] = (byte) (0xff & xor);
-        }
-        return result;
-    }
 
     //TODO Переделать без входных аргументов
     public byte[] Encrypt(byte[] text) {
