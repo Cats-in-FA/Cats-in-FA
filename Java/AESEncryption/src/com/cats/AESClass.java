@@ -413,8 +413,6 @@ public class AESClass {
         return subWord;
     }
 
-
-    //TODO Переделать без входных аргументов
     public byte[] Encrypt(byte[] text) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (int i = 0; i < text.length; i+=16) {
@@ -427,7 +425,6 @@ public class AESClass {
         return out.toByteArray();
     }
 
-    //TODO Переделать без входных аргументов
     public byte[] Decrypt(byte[] text) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         //Едем по 16
