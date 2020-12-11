@@ -23,7 +23,7 @@ public class AESClass {
     private int actual;
 
     // Состояние
-    private int[][][] state;
+    private int[][] state;
 
     //Вектор для преобразования ключа в ключ-матрицу в KeyExpansion
     private int[] vExpansion;
@@ -99,7 +99,7 @@ public class AESClass {
 
         //Создание массива хранения для состояний
         //3-х мерный т.к. нам требуется хранить несколько состояний (2 номера состояния)
-        state = new int[2][4][Nb];
+        state = new int[4][Nb];
 
         //Делает из ключа-строки ключ-матрицу
         KeyExpansion();
@@ -162,12 +162,7 @@ public class AESClass {
     }
 
     // Запуск основных преобразований шифровки
-    private int[][] cipher(int[][] in, int[][] out) {
-        for (int i = 0; i < in.length; i++) {
-            for (int j = 0; j < in.length; j++) {
-                out[i][j] = in[i][j];
-            }
-        }
+    private int[][] cipher(int[][] out) {
         actual = 0;
         AddRoundKey(out, actual);
 
@@ -184,12 +179,7 @@ public class AESClass {
     }
 
     // Запуск основных преобразований дешифровки
-    private int[][] decipher(int[][] in, int[][] out) {
-        for (int i = 0; i < in.length; i++) {
-            for (int j = 0; j < in.length; j++) {
-                out[i][j] = in[i][j];
-            }
-        }
+    private int[][] decipher(int[][] out) {
         actual = Nr;
         AddRoundKey(out, actual);
 
@@ -214,17 +204,17 @@ public class AESClass {
         // Заполняем массив State входными значениями по формуле
         for (int i = 0; i < Nb; i++) { // колонки
             for (int j = 0; j < 4; j++) { // строки
-                state[0][j][i] = text[i * Nb + j] & 0xff;
+                state[j][i] = text[i * Nb + j] & 0xff;
             }
         }
 
         // Запуск основных преобразований
-        cipher(state[0], state[1]);
+        cipher(state);
 
         // Составляем выходной массив зашифрованных байтов из State по формуле
         for (int i = 0; i < Nb; i++) {
             for (int j = 0; j < 4; j++) {
-                out[i * Nb + j] = (byte) (state[1][j][i] & 0xff);
+                out[i * Nb + j] = (byte) (state[j][i] & 0xff);
             }
         }
         return out;
@@ -238,15 +228,15 @@ public class AESClass {
 
         for (int i = 0; i < Nb; i++) { // колонки
             for (int j = 0; j < 4; j++) { // строки
-                state[0][j][i] = text[i * Nb + j] & 0xff;
+                state[j][i] = text[i * Nb + j] & 0xff;
             }
         }
 
-        decipher(state[0], state[1]);
+        decipher(state);
 
         for (int i = 0; i < Nb; i++) {
             for (int j = 0; j < 4; j++) {
-                out[i * Nb + j] = (byte) (state[1][j][i] & 0xff);
+                out[i * Nb + j] = (byte) (state[j][i] & 0xff);
             }
         }
         return out;
