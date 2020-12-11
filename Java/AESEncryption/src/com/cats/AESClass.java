@@ -25,7 +25,7 @@ public class AESClass {
     // Состояние
     private int[][] state;
 
-    //Вектор для преобразования ключа в ключ-матрицу в KeyExpansion
+    //Вектор для будущей матрицы из ключа в KeyExpansion
     private int[] RoundKey;
     // Ключ
     private int[] key;
