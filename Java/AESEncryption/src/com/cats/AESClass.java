@@ -26,7 +26,7 @@ public class AESClass {
     private int[][] state;
 
     //Вектор для преобразования ключа в ключ-матрицу в KeyExpansion
-    private int[] vExpansion;
+    private int[] RoundKey;
     // Ключ
     private int[] key;
 
@@ -110,31 +110,33 @@ public class AESClass {
     private int[] KeyExpansion() {
 
         int temp, i = 0;
-        // The storage vector for the expansion of the key creation.
-        vExpansion = new int[Nb * (Nr + 1)];
+        // Матрица на основе ключа
+        RoundKey = new int[Nb * (Nr + 1)];
 
         while (i < Nk) {
-            vExpansion[i] = 0x00000000;
-            vExpansion[i] |= key[4 * i] << 24;
-            vExpansion[i] |= key[4 * i + 1] << 16;
-            vExpansion[i] |= key[4 * i + 2] << 8;
-            vExpansion[i] |= key[4 * i + 3];
+            RoundKey[i] = 0x00000000;
+            RoundKey[i] |= key[4 * i] << 24;
+            RoundKey[i] |= key[4 * i + 1] << 16;
+            RoundKey[i] |= key[4 * i + 2] << 8;
+            RoundKey[i] |= key[4 * i + 3];
             i++;
         }
         i = Nk;
         while (i < Nb * (Nr + 1)) {
-            temp = vExpansion[i - 1];
+            temp = RoundKey[i - 1];
             if (i % Nk == 0) {
-                // apply an XOR with a constant round rCon.
+                // XOR с константами из rCon.
                 temp = subWord(rotWord(temp)) ^ (rCon[i / Nk] << 24);
-            } else if (Nk > 6 && (i % Nk == 4)) {
-                temp = subWord(temp);
-            } else {
             }
-            vExpansion[i] = vExpansion[i - Nk] ^ temp;
+            else if (Nk > 6 && (i % Nk == 4)) {
+                temp = subWord(temp);
+            }
+            else {
+            }
+            RoundKey[i] = RoundKey[i - Nk] ^ temp;
             i++;
         }
-        return vExpansion;
+        return RoundKey;
     }
 
     private static int rotWord(int word) {
@@ -142,25 +144,58 @@ public class AESClass {
     }
 
 
-    // The 128 bits of a state are an XOR offset applied to them with the 128 bits of the key expended.
-    // s: state matrix that has Nb columns and 4 rows.
-    // Round: A round of the key vExpansion to be added.
-    // s: returns the addition of the key per round
+    //НАЧАЛО
+    public byte[] Encrypt(byte[] text) {
+        return Processing (text, true);
+    }
 
-    /*
-    Трансформация производит побитовый XOR каждого элемента из State с
-    соответствующим элементом из RoundKey.
-    RoundKey — массив такого же размера, как и State, который строится для каждого
-    раунда на основе секретного ключа функцией KeyExpansion()
-     */
-    private int[][] AddRoundKey(int[][] s, int round) {
-        for (int c = 0; c < Nb; c++) {
-            for (int r = 0; r < 4; r++) {
-                s[r][c] = s[r][c] ^ ((vExpansion[round * Nb + c] << (r * 8)) >>> 24);
+    public byte[] Decrypt(byte[] text) {
+        return Processing (text, false);
+    }
+
+
+    private byte[] Processing (byte[] text, boolean flag) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (int i = 0; i < text.length; i+=16) {
+            try {
+                out.write(inputOutputProcessing(Arrays.copyOfRange(text, i, i + 16), flag));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
-        return s;
+        return out.toByteArray();
     }
+
+
+    // Обработка входа и выхода, запуск шифрофки/дешифрофки в зависимости от флага
+    private byte[] inputOutputProcessing (byte[] text, boolean flag) {
+
+        byte[] out = new byte[text.length];
+
+        // Заполняем массив State входными значениями по формуле
+        for (int i = 0; i < Nb; i++) { // колонки
+            for (int j = 0; j < 4; j++) { // строки
+                state[j][i] = text[i * Nb + j] & 0xff;
+            }
+        }
+
+        // Запуск основных преобразований
+        if (flag) {
+            cipher(state);
+        }
+        else {
+            decipher(state);
+        }
+
+        // Составляем выходной массив зашифрованных байтов из State по формуле
+        for (int i = 0; i < Nb; i++) {
+            for (int j = 0; j < 4; j++) {
+                out[i * Nb + j] = (byte) (state[j][i] & 0xff);
+            }
+        }
+        return out;
+    }
+
 
     // Запуск основных преобразований шифровки
     private void cipher(int[][] out) {
@@ -196,54 +231,23 @@ public class AESClass {
 
     }
 
-    // Общий метод шифровки
-    private byte[] encrypt(byte[] text) {
+    /* Блок основных преобразований для шифрования
+    */
 
-        byte[] out = new byte[text.length];
-
-        // Заполняем массив State входными значениями по формуле
-        for (int i = 0; i < Nb; i++) { // колонки
-            for (int j = 0; j < 4; j++) { // строки
-                state[j][i] = text[i * Nb + j] & 0xff;
+    //Трансформация производит побитовый XOR каждого элемента из State с
+    //соответствующим элементом из RoundKey.
+    //RoundKey — массив такого же размера, как и State, который строится для каждого
+    //раунда на основе секретного ключа функцией KeyExpansion()
+    private int[][] AddRoundKey(int[][] s, int round) {
+        for (int c = 0; c < Nb; c++) {
+            for (int r = 0; r < 4; r++) {
+                s[r][c] = s[r][c] ^ ((RoundKey[round * Nb + c] << (r * 8)) >>> 24);
             }
         }
-
-        // Запуск основных преобразований
-        cipher(state);
-
-        // Составляем выходной массив зашифрованных байтов из State по формуле
-        for (int i = 0; i < Nb; i++) {
-            for (int j = 0; j < 4; j++) {
-                out[i * Nb + j] = (byte) (state[j][i] & 0xff);
-            }
-        }
-        return out;
+        return s;
     }
 
-    // Общий метод дешифровки
-    // TODO ПО МОЕМУ ЭТО ТО ЖЕ ЧТО И crypter ТОЛЬКО С ВЫЗОВОМ ДРУГОЙ ФУНКЦИИ
-    private byte[] decrypt(byte[] text) {
 
-        byte[] out = new byte[text.length];
-
-        for (int i = 0; i < Nb; i++) { // колонки
-            for (int j = 0; j < 4; j++) { // строки
-                state[j][i] = text[i * Nb + j] & 0xff;
-            }
-        }
-
-        decipher(state);
-
-        for (int i = 0; i < Nb; i++) {
-            for (int j = 0; j < 4; j++) {
-                out[i * Nb + j] = (byte) (state[j][i] & 0xff);
-            }
-        }
-        return out;
-
-    }
-
-    // Блок основных преобразований для шифрования
     // Замена каждого байта из State на соответствующий ему из константной таблицы Sbox
     private int[][] subBytes(int[][] state) {
         for (int i = 0; i < 4; i++) {
@@ -297,7 +301,7 @@ public class AESClass {
         return state;
     }
 
-    // Каждая колонка в State представляется в виде многочлена и перемножается в поле GF(28)
+    // Каждая колонка в State представляется в виде многочлена и перемножается в поле GF(2^8)
     // по модулю x4 + 1 с фиксированным многочленом 3x3 + x2 + x + 2
     private int[][] mixColumns(int[][] state) {
         int temp0, temp1, temp2, temp3;
@@ -337,6 +341,7 @@ public class AESClass {
         }
         return (b << 1) ^ 0x11b;
     }
+
 
     // Блок основных преобразований для дешифрования (обратный порядок)
     private int[][] invMixColumnas(int[][] state) {
@@ -404,28 +409,5 @@ public class AESClass {
         return subWord;
     }
 
-    public byte[] Encrypt(byte[] text) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (int i = 0; i < text.length; i+=16) {
-            try {
-                out.write(encrypt(Arrays.copyOfRange(text, i, i + 16)));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return out.toByteArray();
-    }
 
-    public byte[] Decrypt(byte[] text) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        //Едем по 16
-        for (int i = 0; i < text.length; i+=16) {
-            try {
-                out.write(decrypt(Arrays.copyOfRange(text, i, i + 16)));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return out.toByteArray();
-    }
 }
