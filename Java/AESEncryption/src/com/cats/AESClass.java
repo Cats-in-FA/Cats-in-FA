@@ -88,6 +88,7 @@ public class AESClass {
             0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd,
             0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d};
 
+    //Это конструктор
     public AESClass(byte[] key) {
 
         //Ключ
@@ -162,7 +163,7 @@ public class AESClass {
     }
 
     // Запуск основных преобразований шифровки
-    private int[][] cipher(int[][] out) {
+    private void cipher(int[][] out) {
         actual = 0;
         AddRoundKey(out, actual);
 
@@ -175,11 +176,11 @@ public class AESClass {
         subBytes(out);
         shiftRows(out);
         AddRoundKey(out, actual);
-        return out;
+
     }
 
     // Запуск основных преобразований дешифровки
-    private int[][] decipher(int[][] out) {
+    private void decipher(int[][] out) {
         actual = Nr;
         AddRoundKey(out, actual);
 
@@ -192,7 +193,6 @@ public class AESClass {
         InvShiftRows(out);
         InvSubBytes(out);
         AddRoundKey(out, actual);
-        return out;
 
     }
 
