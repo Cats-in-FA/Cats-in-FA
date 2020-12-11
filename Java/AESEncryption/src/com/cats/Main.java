@@ -28,7 +28,6 @@ class LocaleFileWriter {
         }
 
     }
-
 }
 
 class LocaleFileReader {
@@ -42,8 +41,6 @@ class LocaleFileReader {
         Path fileLocation = Paths.get(this.filename);
         return Files.readAllBytes(fileLocation);
     }
-
-
 }
 
 public class Main {
@@ -72,6 +69,7 @@ public class Main {
             byte[] encrypt = obj.Encrypt(inputFile.read());
 
             //Запись ключа
+            //TODO сохранять ключ в одну директорию с файлом + имя = файл_key.cat
             new LocaleFileWriter("./files/key.cat", keyBytes);
             //Запись зашифрованного файла на место предыдущего
             new LocaleFileWriter(file2EncryptString, encrypt);
