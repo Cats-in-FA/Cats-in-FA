@@ -6,42 +6,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Scanner;
-
-
-class LocaleFileWriter {
-
-    String fileName;
-    byte[] data;
-
-    public LocaleFileWriter(String fileName, byte[] data) {
-        this.fileName = fileName;
-        this.data = data;
-        this.write();
-    }
-
-    void write() {
-        try (FileOutputStream stream = new FileOutputStream(fileName)) {
-            stream.write(this.data);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-}
-
-class LocaleFileReader {
-    String filename;
-
-    public LocaleFileReader(String filename) {
-        this.filename = filename;
-    }
-
-    public byte[] read() throws IOException {
-        Path fileLocation = Paths.get(this.filename);
-        return Files.readAllBytes(fileLocation);
-    }
-}
 
 public class Main {
 
@@ -61,18 +27,19 @@ public class Main {
                 System.out.println("Введенного файла не существует");
                 return;
             }
-            LocaleFileReader inputFile = new LocaleFileReader(file2EncryptString);
+            FileProcessing inputFile = new FileProcessing(file2EncryptString);
 
             //Генерируем ключ шифрования
             byte[] keyBytes = KeyGenerator();
             AESClass obj = new AESClass(keyBytes);
-            byte[] encrypt = obj.Encrypt(inputFile.read());
+            byte[] encrypt = obj.Encrypt(inputFile.Read());
 
             //Запись ключа
-            //TODO сохранять ключ в одну директорию с файлом + имя = файл_key.cat
-            new LocaleFileWriter("./files/key.cat", keyBytes);
+            FileProcessing outputKeyFile = new FileProcessing(GetKeyDirByPath(file2EncryptString));
+            outputKeyFile.Write(keyBytes);
             //Запись зашифрованного файла на место предыдущего
-            new LocaleFileWriter(file2EncryptString, encrypt);
+            FileProcessing outputDataFile = new FileProcessing(file2EncryptString);
+            outputDataFile.Write(encrypt);
 
             System.out.println("Успешно зашифровали файл " + file2EncryptString);
         }
@@ -93,13 +60,14 @@ public class Main {
                 return;
             }
 
-            LocaleFileReader inputKeyObj = new LocaleFileReader(DecryptKeyString);
-            LocaleFileReader inputFileObj = new LocaleFileReader(file2DecryptString);
+            FileProcessing inputKeyObj = new FileProcessing(DecryptKeyString);
+            FileProcessing inputFileObj = new FileProcessing(file2DecryptString);
 
-            AESClass obj = new AESClass(inputKeyObj.read());
-            byte[] decrypt = obj.Decrypt(inputFileObj.read());
+            AESClass obj = new AESClass(inputKeyObj.Read());
+            byte[] decrypt = obj.Decrypt(inputFileObj.Read());
 
-            new LocaleFileWriter(file2DecryptString, decrypt);
+            FileProcessing resultDataFile = new FileProcessing(file2DecryptString);
+            resultDataFile.Write(decrypt);
 
             System.out.println("Успешно расшифровали файл");
 
@@ -121,4 +89,32 @@ public class Main {
         File tempFile = new File(Path);
         return tempFile.exists();
     }
+
+    //Получение названия файла-ключа на основе названия файла-источника
+    private static String GetKeyDirByPath(String dir){
+
+        //Значит это директория UNIX-подобная
+        if (dir.contains("/")) {
+            String[] bufArr = dir.split("/");
+            String filename = bufArr[bufArr.length-1].split("\\.")[0];
+            String keyName = filename+"_key.cat";
+            bufArr = Arrays.copyOf(bufArr, bufArr.length-1);
+            return String.join("/", bufArr)+"/"+keyName;
+        }
+        //Значит это винда
+        else if (dir.contains("\\")){
+            String[] bufArr = dir.split("\\\\");
+            String filename = bufArr[bufArr.length-1].split("\\.")[0];
+            String keyName = filename+"_key.cat";
+            bufArr = Arrays.copyOf(bufArr, bufArr.length-1);
+            return String.join("\\", bufArr)+"\\"+keyName;
+        }
+        else {
+            String filename = dir.split("\\.")[0];
+            return filename+"_key.cat";
+
+        }
+
+    }
+
 }

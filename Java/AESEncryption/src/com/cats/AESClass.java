@@ -1,9 +1,5 @@
 package com.cats;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-
 /*
 Разработать программу шифровки-дешифровки по алгоритму AES-128.
 Данные берутся из файла, зашифрованные данные сохраняются в указанный файл.
@@ -12,6 +8,9 @@ import java.util.Arrays;
 https://habr.com/ru/post/212235/
  */
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
 
 public class AESClass {
 
