@@ -6,8 +6,8 @@ from models import ImageInfo, SpaceShip, Sprite
 from util import dist
 
 # Константы
-WIDTH = 600
-HEIGHT = 600
+WIDTH = 800
+HEIGHT = 800
 score = 0
 lives = 3
 time = 0

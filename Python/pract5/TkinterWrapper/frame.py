@@ -19,7 +19,7 @@ from .input import InputAdapter
 from .timers import destroy as destroy_timers
 
 
-class Frame(object):
+class Frame:
     def _create_root(self, title):
         root = tkinter.Tk()
         root.wm_title(title)
@@ -29,8 +29,7 @@ class Frame(object):
     def _canvas_init(self, width, height):
         canvas_frame = tkinter.Frame(self._root)
         self._canvas = Canvas(canvas_frame, width, height)
-        canvas_frame.grid(row=0, column=1, rowspan=2, padx=5, pady=5,
-                          sticky=(tkinter.N, tkinter.S, tkinter.W, tkinter.E))
+        canvas_frame.grid(row=0, column=0, rowspan=2, padx=5, pady=5,sticky=(tkinter.N, tkinter.S, tkinter.W, tkinter.E))
 
     def _control_frame_init(self, width):
         self._control_frame = tkinter.Frame(self._root, width=width)
@@ -41,8 +40,7 @@ class Frame(object):
         status_frame.pack_propagate(0)
         canvas_widget = self._canvas._get_widget()
         self._input = InputAdapter(status_frame, self._root, canvas_widget)
-        status_frame.grid(row=1, column=0, sticky=(tkinter.W, tkinter.E),
-                          padx=5, pady=5)
+        status_frame.grid(row=0, column=0, sticky=(tkinter.W, tkinter.E))
 
     def __init__(self, title, canvas_width, canvas_height, control_width):
         self._root = self._create_root(title)

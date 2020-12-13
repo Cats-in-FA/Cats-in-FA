@@ -2,8 +2,8 @@
 import math
 from util import angle_to_vector
 
-WIDTH = 600
-HEIGHT = 600
+WIDTH = 800
+HEIGHT = 800
 
 
 class ImageInfo:
