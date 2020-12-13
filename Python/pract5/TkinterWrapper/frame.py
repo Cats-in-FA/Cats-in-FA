@@ -29,18 +29,18 @@ class Frame:
     def _canvas_init(self, width, height):
         canvas_frame = tkinter.Frame(self._root)
         self._canvas = Canvas(canvas_frame, width, height)
-        canvas_frame.grid(row=0, column=0, rowspan=2, padx=5, pady=5,sticky=(tkinter.N, tkinter.S, tkinter.W, tkinter.E))
+        canvas_frame.grid(row=0, column=0, rowspan=1, padx=0, pady=0,sticky=(tkinter.N, tkinter.S, tkinter.W, tkinter.E))
 
     def _control_frame_init(self, width):
         self._control_frame = tkinter.Frame(self._root, width=width)
-        self._control_frame.grid(row=0, column=0, padx=5, pady=5)
+        self._control_frame.grid(row=0, column=0, padx=0, pady=0)
 
     def _input_init(self):
         status_frame = tkinter.Frame(self._root, width=120, height=85)
-        status_frame.pack_propagate(0)
+        #status_frame.pack_propagate(0)
         canvas_widget = self._canvas._get_widget()
         self._input = InputAdapter(status_frame, self._root, canvas_widget)
-        status_frame.grid(row=0, column=0, sticky=(tkinter.W, tkinter.E))
+        #status_frame.grid(row=0, column=0, sticky=(tkinter.W, tkinter.E))
 
     def __init__(self, title, canvas_width, canvas_height, control_width):
         self._root = self._create_root(title)
@@ -54,8 +54,6 @@ class Frame:
         self._control_frame_init(control_width)
 
         self._input = None
-        self._key_label = None
-        self._mouse_label = None
         self._input_init()
 
     def _shutdown(self):
