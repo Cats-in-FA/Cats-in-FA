@@ -1,4 +1,4 @@
-import simpleguitk as simplegui
+import TkinterWrapper as simplegui
 import math
 import random
 from copy import copy
