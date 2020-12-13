@@ -1,0 +1,14 @@
+Фон
+http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/debris2_blue.png
+Другой фон?
+https://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/nebula_blue.f2014.png
+ЛОГО
+https://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/splash.png
+Корабль
+https://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/double_ship.png
+Пуля,котороая летит в метеорит
+https://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/shot2.png
+Астероид
+http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/asteroid_blue.png
+Взрыв (?)
+http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/explosion_alpha.png
