@@ -1,4 +1,4 @@
-import TkinterWrapper as simplegui
+import TkinterWrapper as tkinter
 import math
 import random
 from copy import copy
@@ -17,43 +17,43 @@ started = False
 # debris images - debris1_brown.png, debris2_brown.png, debris3_brown.png, debris4_brown.png
 #                 debris1_blue.png, debris2_blue.png, debris3_blue.png, debris4_blue.png, debris_blend.png
 debris_info = ImageInfo([320, 240], [640, 480])
-debris_image = simplegui.load_image(
+debris_image = tkinter.load_image(
     "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/debris2_blue.png"
 )
 
 # nebula images - nebula_brown.png, nebula_blue.png
 nebula_info = ImageInfo([400, 300], [800, 600])
-nebula_image = simplegui.load_image(
+nebula_image = tkinter.load_image(
     "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/nebula_blue.f2014.png"
 )
 
 # splash image
 splash_info = ImageInfo([200, 150], [400, 300])
-splash_image = simplegui.load_image(
+splash_image = tkinter.load_image(
     "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/splash.png"
 )
 
 # ship image
 ship_info = ImageInfo([45, 45], [90, 90], 35)
-ship_image = simplegui.load_image(
+ship_image = tkinter.load_image(
     "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/double_ship.png"
 )
 
 # missile image - shot1.png, shot2.png, shot3.png
 missile_info = ImageInfo([5, 5], [10, 10], 3, 50)
-missile_image = simplegui.load_image(
+missile_image = tkinter.load_image(
     "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/shot2.png"
 )
 
 # asteroid images - asteroid_blue.png, asteroid_brown.png, asteroid_blend.png
 asteroid_info = ImageInfo([45, 45], [90, 90], 40)
-asteroid_image = simplegui.load_image(
+asteroid_image = tkinter.load_image(
     "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/asteroid_blue.png"
 )
 
 # animated explosion - explosion_orange.png, explosion_blue.png, explosion_blue2.png, explosion_alpha.png
 explosion_info = ImageInfo([64, 64], [128, 128], 17, 24, True)
-explosion_image = simplegui.load_image(
+explosion_image = tkinter.load_image(
     "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/explosion_alpha.png"
 )
 
@@ -251,7 +251,7 @@ def keyup(button_id):
 
 
 # initialize frame
-frame = simplegui.create_frame("Практика 5. Астероиды", WIDTH, HEIGHT)
+frame = tkinter.create_frame("Практика 5. Астероиды", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
@@ -264,7 +264,7 @@ frame.set_keydown_handler(keydown)
 frame.set_keyup_handler(keyup)
 frame.set_mouseclick_handler(click)
 #Таймер для астероидов
-timer = simplegui.create_timer(1000.0, rock_spawner)
+timer = tkinter.create_timer(1000.0, rock_spawner)
 
 # get things rolling
 timer.start()
