@@ -5,7 +5,6 @@ from copy import copy
 from models import ImageInfo, SpaceShip, Sprite
 from util import dist
 
-
 # Константы
 WIDTH = 800
 HEIGHT = 800
@@ -59,9 +58,9 @@ explosion_image = simplegui.load_image(
 )
 
 
-rock_group = set([])
-missile_group = set([])
-explosion_group = set([])
+rock_group = set({})
+missile_group = set({})
+explosion_group = set({})
 
 
 def draw(canvas):
@@ -79,24 +78,18 @@ def draw(canvas):
         [WIDTH / 2, HEIGHT / 2],
         [WIDTH, HEIGHT],
     )
-    canvas.draw_image(
-        debris_image, center, size, (wtime - WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT)
-    )
-    canvas.draw_image(
-        debris_image, center, size, (wtime + WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT)
-    )
+    canvas.draw_image(debris_image, center, size, (wtime - WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
+    canvas.draw_image(debris_image, center, size, (wtime + WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
 
     str1 = "Счёт: " + str(score)
     str2 = "Жизни: " + str(lives)
     canvas.draw_text(str(str2), [30, 40], 20, "white")
     canvas.draw_text(str(str1), [680, 40], 20, "white")
 
-    # draw ship and sprites
+    #Отрисовка корабля и спрайтов
     my_ship.draw(canvas)
-    # a_rock.draw(canvas)
-    # a_missile.draw(canvas)
 
-    # update ship and sprites
+    #Обновление корабля и спрайтов
     my_ship.update()
     # a_rock.update()
     # a_missile.update()
@@ -134,11 +127,8 @@ def draw(canvas):
 
     score += group_group_collide(rock_group, missile_group)
 
-
-# timer handler that spawns a rock
-
-
 def rock_spawner():
+    """Таймер, который отвечает за спавн метеоритов"""
     global rock_group, my_ship
 
     a_rock = Sprite(
@@ -159,6 +149,7 @@ def rock_spawner():
 
 
 def click(pos):
+    """Обработка нажатия на начало игры"""
     global started, lives, score
 
     center = [WIDTH / 2, HEIGHT / 2]
@@ -214,52 +205,62 @@ def group_group_collide(group1, group2):
     return count
 
 
-def keydown(key):
+
+def keydown(button_id):
+    """Метод отрабатывает, когда кнопки нажимаются"""
     global missile_group
 
     if not started:
         return
 
-    if key == 37:
+    #Поворот влево
+    if button_id == 37 or button_id == 65:
         my_ship.incAv()
 
-    if key == 39:
+    #Поворот вправо
+    if button_id == 39 or button_id == 68:
         my_ship.decAv()
 
-    if key == 38:
+    #Перемещение вперед
+    if button_id == 38 or button_id == 87:
         my_ship.setThrustOn(True)
 
-    if key == 32:
+    #Выстрел
+    if button_id == 32:
         missile_group = my_ship.shoot(
             started, missile_group, missile_image, missile_info
         )
 
 
-def keyup(key):
-
+def keyup(button_id):
+    """Метод отрабатывает, когда кнопки перестают нажиматься"""
     if not started:
         return
 
-    if key == 37 or key == 39:
+    #Перемещение влево/вправо
+    if button_id == 37 or button_id == 39 or button_id == 65 or button_id == 68:
         my_ship.setAv()
 
-    if key == 38:
+    #Перемещение вперед
+    if button_id == 38 or button_id == 87:
         my_ship.setThrustOn(False)
 
 
+
 # initialize frame
-frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
+frame = simplegui.create_frame("Практика 5. Астероиды", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
-# a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0.1, -0.1, asteroid_image, asteroid_info)
-# a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
+#a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0.1, -0.1, asteroid_image, asteroid_info)
+#a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info)
 
 # register handlers
 frame.set_draw_handler(draw)
 frame.set_keydown_handler(keydown)
 frame.set_keyup_handler(keyup)
 frame.set_mouseclick_handler(click)
+#Таймер для астероидов
 timer = simplegui.create_timer(1000.0, rock_spawner)
 
 # get things rolling
