@@ -6,8 +6,8 @@ from models import ImageInfo, SpaceShip, Sprite
 from util import dist
 
 # Константы
-WIDTH = 800
-HEIGHT = 800
+WIDTH = 600
+HEIGHT = 600
 score = 0
 lives = 3
 time = 0
@@ -94,6 +94,7 @@ def draw(canvas):
     # a_rock.update()
     # a_missile.update()
 
+    #Проиграли
     if lives <= 0:
         started = False
         my_ship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
@@ -210,6 +211,7 @@ def keydown(button_id):
     """Метод отрабатывает, когда кнопки нажимаются"""
     global missile_group
 
+    #Если еще не начали игру
     if not started:
         return
 
@@ -234,6 +236,7 @@ def keydown(button_id):
 
 def keyup(button_id):
     """Метод отрабатывает, когда кнопки перестают нажиматься"""
+    #Если еще не начали игру
     if not started:
         return
 
