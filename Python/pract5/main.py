@@ -1,4 +1,4 @@
-import TKinter as tkinter
+import TKinter as tk
 import math
 import random
 from copy import copy
@@ -15,24 +15,49 @@ TIME = 0
 GAME_STARTED = False
 
 #Задний фон
-background = ImageStorage(ImageInfo([400, 400], [800, 800]), tkinter.load_image("./img/background.png"))
+background = ImageStorage(ImageInfo([400, 400], [800, 800]), tk.load_image("./img/background.png"))
 #Эта штука анимируетсяя еще (на переднем плане)
-frontground = ImageStorage(ImageInfo([400, 400], [800, 800]), tkinter.load_image("./img/frontground.png"))
+frontground = ImageStorage(ImageInfo([400, 400], [800, 800]), tk.load_image("./img/frontground.png"))
 #Логотип при запуске
-logo = ImageStorage(ImageInfo([200, 150], [400, 300]), tkinter.load_image("./img/logo.png"))
+logo = ImageStorage(ImageInfo([200, 150], [400, 300]), tk.load_image("./img/logo.png"))
 #Космический корабль
-catship = ImageStorage(ImageInfo([45, 45], [90, 90], 35), tkinter.load_image("./img/double_ship.png"))
+catship = ImageStorage(ImageInfo([45, 45], [90, 90], 35), tk.load_image("./img/ship.png"))
 #Кама-пуля
-missile = ImageStorage(ImageInfo([5, 5], [10, 10], 3, 50), tkinter.load_image("./img/shot2.png"))
+bullet = ImageStorage(ImageInfo([5, 5], [10, 10], 3, 50), tk.load_image("./img/bullet.png"))
 #Астероид
-asteroid = ImageStorage(ImageInfo([45, 45], [90, 90], 40), tkinter.load_image("./img/asteroid.png"))
+asteroid = ImageStorage(ImageInfo([45, 45], [90, 90], 40), tk.load_image("./img/asteroid.png"))
 #Взрыв (анимация)
-explosion = ImageStorage(ImageInfo([64, 64], [128, 128], 17, 24, True), tkinter.load_image("./img/explosion_alpha.png"))
+explosion = ImageStorage(ImageInfo([64, 64], [128, 128], 17, 24, True), tk.load_image("./img/explosion.png"))
 
 #Множества объектов
 asteroidsgroup_set = set({})
 bulletsgroup_set = set({})
 explosionsgroup_set = set({})
+
+
+def click(pos):
+    """Обработка нажатия на начало игры"""
+    global GAME_STARTED, LIVES, SCORE
+
+    center = [WIDTH / 2, HEIGHT / 2]
+    size = logo.info.get_size()
+    inwidth = (center[0] - size[0] / 2) < pos[0] < (center[0] + size[0] / 2)
+    inheight = (center[1] - size[1] / 2) < pos[1] < (center[1] + size[1] / 2)
+    if (not GAME_STARTED) and inwidth and inheight:
+        GAME_STARTED = True
+        LIVES = 3
+        SCORE = 0
+
+def asteroids_spawner():
+    """Таймер, который отвечает за спавн метеоритов"""
+    global asteroidsgroup_set, catship
+
+    #Рандомное место спавна для астероида
+    asteroid_sprite = Sprite([random.choice(range(WIDTH)), random.choice(range(HEIGHT))],[1, 1],0.1,random.choice([-0.3, 0.3]),asteroid.image,asteroid.info,)
+
+    #Кол-во метеоритов на карте одновременно
+    if (len(asteroidsgroup_set) < 50 and dist(asteroid_sprite.getPosition(), catship.getPosition()) > 70 and GAME_STARTED):
+        asteroidsgroup_set.add(asteroid_sprite)
 
 
 def draw(canvas):
@@ -45,13 +70,8 @@ def draw(canvas):
     center = frontground.info.get_center()
     size = frontground.info.get_size()
     #Отрисовка бекграунда
-    canvas.draw_image(
-        background.image,
-        background.info.get_center(),
-        background.info.get_size(),
-        [WIDTH / 2, HEIGHT / 2],
-        [WIDTH, HEIGHT],
-    )
+    canvas.draw_image(background.image,background.info.get_center(),background.info.get_size(),[WIDTH / 2, HEIGHT / 2],[WIDTH, HEIGHT],)
+    
     #Отрисовка анимации поверх бекграунда (она в png)
     canvas.draw_image(frontground.image, center, size, (wtime - WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
     canvas.draw_image(frontground.image, center, size, (wtime + WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
@@ -87,13 +107,7 @@ def draw(canvas):
     #Если еще не начали игру
     if not GAME_STARTED:
         #Отрисовываем лого игры
-        canvas.draw_image(
-            logo.image,
-            logo.info.get_center(),
-            logo.info.get_size(),
-            [WIDTH / 2, HEIGHT / 2],
-            logo.info.get_size(),
-        )
+        canvas.draw_image(logo.image, logo.info.get_center(), logo.info.get_size(), [WIDTH / 2, HEIGHT / 2], logo.info.get_size())
 
     #Если уже начали игру
     if GAME_STARTED:
@@ -108,41 +122,6 @@ def draw(canvas):
     # Если мы убили метеорит - у нас прибавились очки
     SCORE += group_group_collide(asteroidsgroup_set, bulletsgroup_set)
 
-def rock_spawner():
-    """Таймер, который отвечает за спавн метеоритов"""
-    global asteroidsgroup_set, catship
-
-    a_rock = Sprite(
-        #Рандомное место спавна 
-        [random.choice(range(WIDTH)), random.choice(range(HEIGHT))],
-        [1, 1],
-        0.1,
-        random.choice([-0.3, 0.3]),
-        asteroid.image,
-        asteroid.info,
-    )
-
-    if (
-        #Кол-во метеоритов на карте одновременно
-        len(asteroidsgroup_set) < 50
-        and dist(a_rock.getPosition(), catship.getPosition()) > 70
-        and GAME_STARTED
-    ):
-        asteroidsgroup_set.add(a_rock)
-
-
-def click(pos):
-    """Обработка нажатия на начало игры"""
-    global GAME_STARTED, LIVES, SCORE
-
-    center = [WIDTH / 2, HEIGHT / 2]
-    size = logo.info.get_size()
-    inwidth = (center[0] - size[0] / 2) < pos[0] < (center[0] + size[0] / 2)
-    inheight = (center[1] - size[1] / 2) < pos[1] < (center[1] + size[1] / 2)
-    if (not GAME_STARTED) and inwidth and inheight:
-        GAME_STARTED = True
-        LIVES = 3
-        SCORE = 0
 
 
 def process_sprite_group(s, canvas):
@@ -151,7 +130,6 @@ def process_sprite_group(s, canvas):
         sprite.draw(canvas)
         if sprite.update():
             s.remove(sprite)
-
 
 def group_collide(s, other_object):
 
@@ -164,14 +142,7 @@ def group_collide(s, other_object):
             explosion_vel = [0, 0]
             explosion_avel = 0
             #Показываем взрыв
-            explosion_sprite = Sprite(
-                explosion_pos,
-                explosion_vel,
-                0,
-                explosion_avel,
-                explosion.image,
-                explosion.info,
-            )
+            explosion_sprite = Sprite(explosion_pos,explosion_vel, 0, explosion_avel, explosion.image, explosion.info)
             #Добавляем взрыв в группу взрывов
             explosionsgroup_set.add(explosion_sprite)
             return True
@@ -213,7 +184,7 @@ def keydown(button_id):
 
     #Выстрел
     if button_id == 32:
-        bulletsgroup_set = catship.shoot(GAME_STARTED, bulletsgroup_set, missile.image, missile.info)
+        bulletsgroup_set = catship.shoot(GAME_STARTED, bulletsgroup_set, bullet.image, bullet.info)
 
 
 def keyup(button_id):
@@ -231,7 +202,7 @@ def keyup(button_id):
         catship.setThrustOn(False)
 
 
-localeframe = tkinter.create_frame("Практика 5. Астероиды", WIDTH, HEIGHT)
+localeframe = tk.create_frame("Практика 5. Астероиды", WIDTH, HEIGHT)
 catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship.image, catship.info)
 
 #Выставляем обработчики
@@ -240,7 +211,7 @@ localeframe.set_keydown_handler(keydown)
 localeframe.set_keyup_handler(keyup)
 localeframe.set_mouseclick_handler(click)
 #Таймер для спавна метеоритов
-timer = tkinter.create_timer(1000.0, rock_spawner)
+timer = tk.create_timer(1000.0, asteroids_spawner)
 
 #Старт таймеров и т д
 timer.start()
