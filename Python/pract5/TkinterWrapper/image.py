@@ -6,20 +6,12 @@ from __future__ import division
 
 import io
 import math
-try:
-    from urllib2 import urlopen
-except ImportError:
-    from urllib.request import urlopen
+from PIL import Image as PILImage
+from PIL import ImageTk
 
-
-class Image(object):
-    def __init__(self, url):
-        from PIL import Image as PilImage
-        if url.startswith('http'):
-            image = urlopen(url).read()
-            self._image = PilImage.open(io.BytesIO(image)).convert('RGBA')
-        else:
-            self._image = PilImage.open(url,'rb').convert('RGBA')
+class Image:
+    def __init__(self, path):
+        self._image = PILImage.open(path)
         self._versions = {}
 
     def get_width(self):
@@ -29,8 +21,7 @@ class Image(object):
         return self._image.size[1]
 
     def _get_tkimage(self, center, wh_src, wh_dst, rot):
-        from PIL import Image as PilImage
-        from PIL import ImageTk
+
         rot = -int(math.degrees(rot))
         version = ','.join([str(center), str(wh_src), str(wh_dst), str(rot)])
         if version not in self._versions:
@@ -41,16 +32,15 @@ class Image(object):
                     int(center[1] + wh_src[1] // 2))
             image = image.crop([int(x) for x in crop])
             if wh_src != wh_dst:
-                image = image.resize([int(x) for x in wh_dst],
-                                     resample=PilImage.BILINEAR)
+                image = image.resize([int(x) for x in wh_dst], resample=PILImage.BILINEAR)
             if rot != 0:
-                image = image.rotate(rot, resample=PilImage.BICUBIC, expand=1)
+                image = image.rotate(rot, resample=PILImage.BICUBIC, expand=1)
             self._versions[version] = ImageTk.PhotoImage(image)
         return self._versions[version]
 
 
-def load_image(URL):
-    return Image(URL)
+def load_image(path):
+    return Image(path)
 
 
 def get_width(image):
