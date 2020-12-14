@@ -1,9 +1,10 @@
-import TkinterWrapper as tkinter
+import TKinter as tkinter
 import math
 import random
 from copy import copy
 from models import ImageInfo, SpaceShip, Sprite
 from util import dist
+from imagelogic import ImageStorage
 
 # Константы
 WIDTH = 800
@@ -13,35 +14,22 @@ LIVES = 10
 TIME = 0
 GAME_STARTED = False
 
+#Задний фон
+background = ImageStorage(ImageInfo([400, 400], [800, 800]), tkinter.load_image("./img/background.png"))
+#Эта штука анимируетсяя еще (на переднем плане)
+frontground = ImageStorage(ImageInfo([400, 400], [800, 800]), tkinter.load_image("./img/frontground.png"))
+#Логотип при запуске
+logo = ImageStorage(ImageInfo([200, 150], [400, 300]), tkinter.load_image("./img/logo.png"))
+#Космический корабль
+catship = ImageStorage(ImageInfo([45, 45], [90, 90], 35), tkinter.load_image("./img/double_ship.png"))
+#Кама-пуля
+missile = ImageStorage(ImageInfo([5, 5], [10, 10], 3, 50), tkinter.load_image("./img/shot2.png"))
+#Астероид
+asteroid = ImageStorage(ImageInfo([45, 45], [90, 90], 40), tkinter.load_image("./img/asteroid.png"))
+#Взрыв (анимация)
+explosion = ImageStorage(ImageInfo([64, 64], [128, 128], 17, 24, True), tkinter.load_image("./img/explosion_alpha.png"))
 
-debris_info = ImageInfo([400, 400], [800, 800])
-debris_image = tkinter.load_image("./img/frontground.png")
-
-# nebula images - nebula_brown.png, nebula_blue.png
-nebula_info = ImageInfo([400, 400], [800, 800])
-nebula_image = tkinter.load_image("./img/background.png")
-
-# splash image
-splash_info = ImageInfo([200, 150], [400, 300])
-splash_image = tkinter.load_image("./img/splash.png")
-
-#
-catship_info = ImageInfo([45, 45], [90, 90], 35)
-catship_image = tkinter.load_image("./img/double_ship.png")
-
-#Пуля
-missile_info = ImageInfo([5, 5], [10, 10], 3, 50)
-missile_image = tkinter.load_image("./img/shot2.png")
-
-# asteroid images - asteroid_blue.png, asteroid_brown.png, asteroid_blend.png
-asteroid_info = ImageInfo([45, 45], [90, 90], 40)
-asteroid_image = tkinter.load_image("./img/asteroid.png")
-
-# animated explosion - explosion_orange.png, explosion_blue.png, explosion_blue2.png, explosion_alpha.png
-explosion_info = ImageInfo([64, 64], [128, 128], 17, 24, True)
-explosion_image = tkinter.load_image("./img/explosion_alpha.png")
-
-
+#Множества объектов
 asteroidsgroup_set = set({})
 bulletsgroup_set = set({})
 explosionsgroup_set = set({})
@@ -54,18 +42,21 @@ def draw(canvas):
     #Анимация бекграунда кадра
     TIME += 3
     wtime = (TIME / 4) % WIDTH
-    center = debris_info.get_center()
-    size = debris_info.get_size()
+    center = frontground.info.get_center()
+    size = frontground.info.get_size()
+    #Отрисовка бекграунда
     canvas.draw_image(
-        nebula_image,
-        nebula_info.get_center(),
-        nebula_info.get_size(),
+        background.image,
+        background.info.get_center(),
+        background.info.get_size(),
         [WIDTH / 2, HEIGHT / 2],
         [WIDTH, HEIGHT],
     )
-    canvas.draw_image(debris_image, center, size, (wtime - WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
-    canvas.draw_image(debris_image, center, size, (wtime + WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
+    #Отрисовка анимации поверх бекграунда (она в png)
+    canvas.draw_image(frontground.image, center, size, (wtime - WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
+    canvas.draw_image(frontground.image, center, size, (wtime + WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
 
+    #Статистика текущей игры
     str1 = "Счёт: " + str(SCORE)
     str2 = "Жизни: " + str(LIVES)
     canvas.draw_text(str(str2), [40, 40], 20, "white")
@@ -77,10 +68,10 @@ def draw(canvas):
     #Обновление корабля и спрайтов
     catship.update()
 
-    #Проиграли
+    #Если мы проиграли
     if LIVES <= 0:
         GAME_STARTED = False
-        catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship_image, catship_info)
+        catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship.image, catship.info)
         catship.setThrustOn(False)
 
         #Удаляем все элементы игры, которые были
@@ -95,12 +86,13 @@ def draw(canvas):
 
     #Если еще не начали игру
     if not GAME_STARTED:
+        #Отрисовываем лого игры
         canvas.draw_image(
-            splash_image,
-            splash_info.get_center(),
-            splash_info.get_size(),
+            logo.image,
+            logo.info.get_center(),
+            logo.info.get_size(),
             [WIDTH / 2, HEIGHT / 2],
-            splash_info.get_size(),
+            logo.info.get_size(),
         )
 
     #Если уже начали игру
@@ -126,8 +118,8 @@ def rock_spawner():
         [1, 1],
         0.1,
         random.choice([-0.3, 0.3]),
-        asteroid_image,
-        asteroid_info,
+        asteroid.image,
+        asteroid.info,
     )
 
     if (
@@ -144,7 +136,7 @@ def click(pos):
     global GAME_STARTED, LIVES, SCORE
 
     center = [WIDTH / 2, HEIGHT / 2]
-    size = splash_info.get_size()
+    size = logo.info.get_size()
     inwidth = (center[0] - size[0] / 2) < pos[0] < (center[0] + size[0] / 2)
     inheight = (center[1] - size[1] / 2) < pos[1] < (center[1] + size[1] / 2)
     if (not GAME_STARTED) and inwidth and inheight:
@@ -172,16 +164,16 @@ def group_collide(s, other_object):
             explosion_vel = [0, 0]
             explosion_avel = 0
             #Показываем взрыв
-            explosion = Sprite(
+            explosion_sprite = Sprite(
                 explosion_pos,
                 explosion_vel,
                 0,
                 explosion_avel,
-                explosion_image,
-                explosion_info,
+                explosion.image,
+                explosion.info,
             )
             #Добавляем взрыв в группу взрывов
-            explosionsgroup_set.add(explosion)
+            explosionsgroup_set.add(explosion_sprite)
             return True
 
     return False
@@ -221,7 +213,7 @@ def keydown(button_id):
 
     #Выстрел
     if button_id == 32:
-        bulletsgroup_set = catship.shoot(GAME_STARTED, bulletsgroup_set, missile_image, missile_info)
+        bulletsgroup_set = catship.shoot(GAME_STARTED, bulletsgroup_set, missile.image, missile.info)
 
 
 def keyup(button_id):
@@ -240,7 +232,7 @@ def keyup(button_id):
 
 
 localeframe = tkinter.create_frame("Практика 5. Астероиды", WIDTH, HEIGHT)
-catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship_image, catship_info)
+catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship.image, catship.info)
 
 #Выставляем обработчики
 localeframe.set_draw_handler(draw)
