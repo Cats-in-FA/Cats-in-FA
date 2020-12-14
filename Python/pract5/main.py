@@ -6,8 +6,8 @@ from models import ImageInfo, SpaceShip, Sprite
 from util import dist
 
 # Константы
-WIDTH = 800
-HEIGHT = 800
+WIDTH = 2560
+HEIGHT = 1600
 score = 0
 lives = 3
 time = 0
@@ -22,9 +22,9 @@ debris_image = tkinter.load_image(
 )
 
 # nebula images - nebula_brown.png, nebula_blue.png
-nebula_info = ImageInfo([400, 300], [800, 600])
+nebula_info = ImageInfo([2125, 1600], [4250, 3200])
 nebula_image = tkinter.load_image(
-    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/nebula_blue.f2014.png"
+    "https://sun9-45.userapi.com/impg/YLwUkqjeJg3ozxkiziYxbO5Ox3yT01EaxvZdig/crKir362x2o.jpg?size=2560x1600&quality=96&proxy=1&sign=0ac8052f241acd3c4648e627f385b184&type=album"
 )
 
 # splash image
@@ -46,9 +46,9 @@ missile_image = tkinter.load_image(
 )
 
 # asteroid images - asteroid_blue.png, asteroid_brown.png, asteroid_blend.png
-asteroid_info = ImageInfo([45, 45], [90, 90], 40)
+asteroid_info = ImageInfo([300, 300], [600, 600], 40)
 asteroid_image = tkinter.load_image(
-    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/asteroid_blue.png"
+    "https://vk.com/doc268112682_580599618?hash=e453bf88a0556af2d2&dl=9bd8ff236a494277bf"
 )
 
 # animated explosion - explosion_orange.png, explosion_blue.png, explosion_blue2.png, explosion_alpha.png
@@ -83,8 +83,8 @@ def draw(canvas):
 
     str1 = "Счёт: " + str(score)
     str2 = "Жизни: " + str(lives)
-    canvas.draw_text(str(str2), [30, 40], 20, "white")
-    canvas.draw_text(str(str1), [680, 40], 20, "white")
+    canvas.draw_text(str(str2), [40, 40], 20, "white")
+    canvas.draw_text(str(str1), [40, 80], 20, "white")
 
     #Отрисовка корабля и спрайтов
     my_ship.draw(canvas)
