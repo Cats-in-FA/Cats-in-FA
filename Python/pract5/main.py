@@ -21,7 +21,7 @@ frontground = ImageStorage(ImageInfo([400, 400], [800, 800]), tk.load_image("./i
 #Логотип при запуске
 logo = ImageStorage(ImageInfo([200, 150], [400, 300]), tk.load_image("./img/logo.png"))
 #Космический корабль
-catship = ImageStorage(ImageInfo([45, 45], [90, 90], 35), tk.load_image("./img/ship.png"))
+catship_img = ImageStorage(ImageInfo([45, 45], [90, 90], 35), tk.load_image("./img/ship.png"))
 #Кама-пуля
 bullet = ImageStorage(ImageInfo([5, 5], [10, 10], 3, 50), tk.load_image("./img/bullet.png"))
 #Астероид
@@ -39,7 +39,7 @@ def click(pos):
     global GAME_STARTED, LIVES, SCORE
 
     center = [WIDTH / 2, HEIGHT / 2]
-    size = logo.info.get_size()
+    size = logo.info.size
     inwidth = (center[0] - size[0] / 2) < pos[0] < (center[0] + size[0] / 2)
     inheight = (center[1] - size[1] / 2) < pos[1] < (center[1] + size[1] / 2)
     
@@ -53,10 +53,10 @@ def asteroids_spawner():
     global asteroidsgroup_set, catship
 
     #Рандомное место спавна для астероида
-    asteroid_sprite = Sprite([random.choice(range(WIDTH)), random.choice(range(HEIGHT))],[1, 1],0.1,random.choice([-0.3, 0.3]),asteroid.image,asteroid.info,)
+    asteroid_sprite = Sprite([random.choice(range(WIDTH)), random.choice(range(HEIGHT))],[1, 1],0.1,random.choice([-0.01, 0.01]),asteroid.image,asteroid.info,)
 
     #Кол-во метеоритов на карте одновременно
-    if (len(asteroidsgroup_set) < 50 and dist(asteroid_sprite.getPosition(), catship.getPosition()) > 70 and GAME_STARTED):
+    if (len(asteroidsgroup_set) < 50 and dist(asteroid_sprite.position, catship.position) > 70 and GAME_STARTED):
         asteroidsgroup_set.add(asteroid_sprite)
 
 
@@ -67,10 +67,10 @@ def draw(canvas):
     #Анимация бекграунда кадра
     TIME += 3
     wtime = (TIME / 4) % WIDTH
-    center = frontground.info.get_center()
-    size = frontground.info.get_size()
+    center = frontground.info.center
+    size = frontground.info.size
     #Отрисовка бекграунда
-    canvas.draw_image(background.image,background.info.get_center(),background.info.get_size(),[WIDTH / 2, HEIGHT / 2],[WIDTH, HEIGHT],)
+    canvas.draw_image(background.image,background.info.center,background.info.size,[WIDTH / 2, HEIGHT / 2],[WIDTH, HEIGHT],)
     
     #Отрисовка анимации поверх бекграунда (она в png)
     canvas.draw_image(frontground.image, center, size, (wtime - WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
@@ -91,8 +91,8 @@ def draw(canvas):
     #Если мы проиграли
     if LIVES <= 0:
         GAME_STARTED = False
-        catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship.image, catship.info)
-        catship.setThrustOn(False)
+        catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship_img.image, catship_img.info)
+        catship.ismove = False
 
         #Удаляем все элементы игры, которые были
         for sprite in set(asteroidsgroup_set):
@@ -107,7 +107,7 @@ def draw(canvas):
     #Если еще не начали игру
     if not GAME_STARTED:
         #Отрисовываем лого игры
-        canvas.draw_image(logo.image, logo.info.get_center(), logo.info.get_size(), [WIDTH / 2, HEIGHT / 2], logo.info.get_size())
+        canvas.draw_image(logo.image, logo.info.center, logo.info.size, [WIDTH / 2, HEIGHT / 2], logo.info.size)
 
     #Если уже начали игру
     if GAME_STARTED:
@@ -138,7 +138,7 @@ def group_collide(s, other_object):
         #Если попали в другой объект
         if sprite.collide(other_object):
             s.remove(sprite)
-            explosion_pos = sprite.getPosition()
+            explosion_pos = sprite.position
             explosion_vel = [0, 0]
             explosion_avel = 0
             #Показываем взрыв
@@ -180,7 +180,7 @@ def keydown(button_id):
 
     #Перемещение вперед
     if button_id == 38 or button_id == 87:
-        catship.setThrustOn(True)
+        catship.ismove = True
 
     #Выстрел
     if button_id == 32:
@@ -199,11 +199,11 @@ def keyup(button_id):
 
     #Перемещение вперед
     if button_id == 38 or button_id == 87:
-        catship.setThrustOn(False)
+        catship.ismove = False
 
 
 localeframe = tk.create_frame("Практика 5. Астероиды", WIDTH, HEIGHT)
-catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship.image, catship.info)
+catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship_img.image, catship_img.info)
 
 #Выставляем обработчики
 localeframe.set_draw_handler(draw)

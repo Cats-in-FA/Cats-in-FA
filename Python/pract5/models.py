@@ -1,10 +1,9 @@
 """Модуль с основными моделями для игры"""
+#TODO реализовать геттеры-сеттеры через property
+
 import math
 from util import angle_to_vector
-
-WIDTH = 800
-HEIGHT = 800
-
+WIDTH, HEIGHT =  (800,)*2
 
 class ImageInfo:
     """
@@ -13,33 +12,40 @@ class ImageInfo:
     """
 
     def __init__(self, center, size, radius=0, lifespan=None, animated=False):
-        self.center = center
-        self.size = size
-        self.radius = radius
+        self._center = center
+        self._size = size
+        self._radius = radius
         if lifespan:
-            self.lifespan = lifespan
+            self._lifespan = lifespan
         else:
-            self.lifespan = float("inf")
-        self.animated = animated
+            self._lifespan = float("inf")
+        self._animated = animated
 
-    def get_center(self):
-        return self.center
+    @property
+    def center(self):
+        return self._center
 
-    def get_size(self):
-        return self.size
+    @property
+    def size(self):
+        return self._size
 
-    def get_radius(self):
-        return self.radius
+    @property
+    def radius(self):
+        return self._radius
 
-    def get_lifespan(self):
-        return self.lifespan
+    @property
+    def lifespan(self):
+        return self._lifespan
 
-    def get_animated(self):
-        return self.animated
-
+    @property
+    def animated(self):
+        return self._animated
 
 class Sprite:
-    """Класс спрайта"""
+    """
+    Класс спрайта
+    Используется для всех объектов
+    """
 
     def __init__(self, pos, vel, ang, ang_vel, image, info):
         self.pos = [pos[0], pos[1]]
@@ -47,18 +53,21 @@ class Sprite:
         self.angle = ang
         self.angle_vel = ang_vel
         self.image = image
-        self.image_center = info.get_center()
-        self.image_size = info.get_size()
-        self.radius = info.get_radius()
-        self.lifespan = info.get_lifespan()
-        self.animated = info.get_animated()
+        self.image_center = info.center
+        self.image_size = info.size
+        self._radius = info.radius
+        self.lifespan = info.lifespan
+        self.animated = info.animated
         self.age = 0
 
-    def getPosition(self):
+    @property
+    def position(self):
         return self.pos
 
-    def getRadius(self):
-        return self.radius
+    @property
+    def radius(self):
+        return self._radius
+    
 
     def draw(self, canvas):
 
@@ -99,13 +108,12 @@ class Sprite:
 
     def collide(self, other_object):
         dist = math.pow(
-            (self.getPosition()[0] - other_object.getPosition()[0]), 2
-        ) + math.pow((self.getPosition()[1] - other_object.getPosition()[1]), 2)
+            (self.position[0] - other_object.position[0]), 2
+        ) + math.pow((self.position[1] - other_object.position[1]), 2)
         dist = math.pow(dist, 0.5)
-        if self.getRadius() + other_object.getRadius() > dist:
+        if self._radius + other_object.radius > dist:
             return True
         return False
-
 
 class SpaceShip:
     """Класс космического корабля"""
@@ -117,9 +125,9 @@ class SpaceShip:
         self.angle = angle
         self.angle_vel = 0
         self.image = image
-        self.image_center = info.get_center()
-        self.image_size = info.get_size()
-        self.radius = info.get_radius()
+        self.image_center = info.center
+        self.image_size = info.size
+        self._radius = info.radius
         self.thrust = False
 
     def draw(self, canvas):
@@ -174,14 +182,24 @@ class SpaceShip:
     def setAv(self):
         self.angle_vel = 0
 
-    def setThrustOn(self, val):
+    @property
+    def ismove(self):
+        return self.thrust
+    
+    @ismove.setter
+    def ismove(self, val):
         self.thrust = val
 
-    def getPosition(self):
+    @property
+    def position(self):
         return self.pos
-
-    def getRadius(self):
-        return self.radius
+    @property
+    def radius(self):
+        return self._radius
+    
+    @radius.setter
+    def radius(self, value):
+        self._radius = value
 
     def shoot(self, started, missile_group, missile_image, missile_info):
         """Стрельба"""
