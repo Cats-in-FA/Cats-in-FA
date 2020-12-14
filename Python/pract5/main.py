@@ -18,7 +18,7 @@ started = False
 #                 debris1_blue.png, debris2_blue.png, debris3_blue.png, debris4_blue.png, debris_blend.png
 debris_info = ImageInfo([320, 240], [640, 480])
 debris_image = tkinter.load_image(
-    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/debris2_blue.png"
+    "./img/debris2_blue.png"
 )
 
 # nebula images - nebula_brown.png, nebula_blue.png
@@ -30,19 +30,19 @@ nebula_image = tkinter.load_image(
 # splash image
 splash_info = ImageInfo([200, 150], [400, 300])
 splash_image = tkinter.load_image(
-    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/splash.png"
+    "./img/splash.png"
 )
 
 # ship image
 ship_info = ImageInfo([45, 45], [90, 90], 35)
 ship_image = tkinter.load_image(
-    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/double_ship.png"
+    "./img/double_ship.png"
 )
 
 # missile image - shot1.png, shot2.png, shot3.png
 missile_info = ImageInfo([5, 5], [10, 10], 3, 50)
 missile_image = tkinter.load_image(
-    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/shot2.png"
+    "./img/shot2.png"
 )
 
 # asteroid images - asteroid_blue.png, asteroid_brown.png, asteroid_blend.png
@@ -54,7 +54,7 @@ asteroid_image = tkinter.load_image(
 # animated explosion - explosion_orange.png, explosion_blue.png, explosion_blue2.png, explosion_alpha.png
 explosion_info = ImageInfo([64, 64], [128, 128], 17, 24, True)
 explosion_image = tkinter.load_image(
-    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/explosion_alpha.png"
+    "./img/explosion_alpha.png"
 )
 
 
