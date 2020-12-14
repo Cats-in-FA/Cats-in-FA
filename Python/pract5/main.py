@@ -24,7 +24,7 @@ debris_image = tkinter.load_image(
 # nebula images - nebula_brown.png, nebula_blue.png
 nebula_info = ImageInfo([2125, 1600], [4250, 3200])
 nebula_image = tkinter.load_image(
-    "https://sun9-45.userapi.com/impg/YLwUkqjeJg3ozxkiziYxbO5Ox3yT01EaxvZdig/crKir362x2o.jpg?size=2560x1600&quality=96&proxy=1&sign=0ac8052f241acd3c4648e627f385b184&type=album"
+    "./img/background.png"
 )
 
 # splash image
@@ -48,7 +48,7 @@ missile_image = tkinter.load_image(
 # asteroid images - asteroid_blue.png, asteroid_brown.png, asteroid_blend.png
 asteroid_info = ImageInfo([300, 300], [600, 600], 40)
 asteroid_image = tkinter.load_image(
-    "https://vk.com/doc268112682_580599618?hash=e453bf88a0556af2d2&dl=9bd8ff236a494277bf"
+    "./img/asteroid.png"
 )
 
 # animated explosion - explosion_orange.png, explosion_blue.png, explosion_blue2.png, explosion_alpha.png
