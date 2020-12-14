@@ -34,7 +34,6 @@ asteroidsgroup_set = set({})
 bulletsgroup_set = set({})
 explosionsgroup_set = set({})
 
-
 def click(pos):
     """Обработка нажатия на начало игры"""
     global GAME_STARTED, LIVES, SCORE
@@ -43,6 +42,7 @@ def click(pos):
     size = logo.info.get_size()
     inwidth = (center[0] - size[0] / 2) < pos[0] < (center[0] + size[0] / 2)
     inheight = (center[1] - size[1] / 2) < pos[1] < (center[1] + size[1] / 2)
+    
     if (not GAME_STARTED) and inwidth and inheight:
         GAME_STARTED = True
         LIVES = 3
