@@ -6,8 +6,8 @@ from models import ImageInfo, SpaceShip, Sprite
 from util import dist
 
 # Константы
-WIDTH = 2560
-HEIGHT = 1600
+WIDTH = 800
+HEIGHT = 800
 score = 0
 lives = 3
 time = 0
@@ -22,7 +22,7 @@ debris_image = tkinter.load_image(
 )
 
 # nebula images - nebula_brown.png, nebula_blue.png
-nebula_info = ImageInfo([2125, 1600], [4250, 3200])
+nebula_info = ImageInfo([400, 400], [800, 800])
 nebula_image = tkinter.load_image(
     "./img/background.png"
 )
@@ -46,7 +46,7 @@ missile_image = tkinter.load_image(
 )
 
 # asteroid images - asteroid_blue.png, asteroid_brown.png, asteroid_blend.png
-asteroid_info = ImageInfo([300, 300], [600, 600], 40)
+asteroid_info = ImageInfo([45, 45], [90, 90], 40)
 asteroid_image = tkinter.load_image(
     "./img/asteroid.png"
 )
