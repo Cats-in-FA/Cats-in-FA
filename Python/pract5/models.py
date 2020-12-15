@@ -70,27 +70,11 @@ class Sprite:
 
     def draw(self, canvas):
 
+        #Если анимировано
         if self._animated:
-            canvas.draw_image(
-                self._image,
-                [
-                    self._image_center[0] + self._age * self._image_size[0],
-                    self._image_center[1],
-                ],
-                self._image_size,
-                self._pos,
-                self._image_size,
-                self._angle,
-            )
+            canvas.draw_image(self._image,[self._image_center[0] + self._age * self._image_size[0],self._image_center[1],],self._image_size,self._pos,self._image_size,self._angle)
         else:
-            canvas.draw_image(
-                self._image,
-                self._image_center,
-                self._image_size,
-                self._pos,
-                self._image_size,
-                self._angle,
-            )
+            canvas.draw_image(self._image, self._image_center, self._image_size, self._pos, self._image_size, self._angle)
 
     def update(self):
         self._angle += self._angle_vel
@@ -106,9 +90,8 @@ class Sprite:
             return False
 
     def collide(self, other_object):
-        dist = math.pow(
-            (self.position[0] - other_object.position[0]), 2
-        ) + math.pow((self.position[1] - other_object.position[1]), 2)
+        """Столкновение с другим объектом"""
+        dist = math.pow((self.position[0] - other_object.position[0]), 2) + math.pow((self.position[1] - other_object.position[1]), 2)
         dist = math.pow(dist, 0.5)
         if self._radius + other_object.radius > dist:
             return True
@@ -131,27 +114,11 @@ class SpaceShip:
     def draw(self, canvas):
 
         if self._thrust:
-
             t = 90
-
-            canvas.draw_image(
-                self._image,
-                (self._image_center[0] + t, self._image_center[1]),
-                self._image_size,
-                self._pos,
-                self._image_size,
-                self._angle,
-            )
+            canvas.draw_image(self._image, (self._image_center[0] + t, self._image_center[1]), self._image_size, self._pos, self._image_size, self._angle)
 
         else:
-            canvas.draw_image(
-                self._image,
-                self._image_center,
-                self._image_size,
-                self._pos,
-                self._image_size,
-                self._angle,
-            )
+            canvas.draw_image(self._image, self._image_center, self._image_size, self._pos, self._image_size, self._angle)
 
     def update(self):
 
