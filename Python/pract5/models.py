@@ -43,14 +43,19 @@ class ImageInfo:
 class Sprite:
     """
     Класс спрайта.
-    Используется для метеоритов и взрывов
+    Используется для метеоритов, взрывов и пуль
     """
 
-    def __init__(self, pos, vel, ang, ang_vel, image, info):
+    def __init__(self, pos, vel, angle, ang_vel, image, info):
+        #Позиция
         self._pos = [pos[0], pos[1]]
+        #Скорость
         self._vel = [vel[0], vel[1]]
-        self._angle = ang
+        #Угол текущий
+        self._angle = angle
+        #Угол вращения
         self._angle_vel = ang_vel
+
         self._image = image
         self._image_center = info.center
         self._image_size = info.size
@@ -73,9 +78,9 @@ class Sprite:
 
         #Если это анимированный взрыв
         if self._animated:
-            canvas.draw_image(self._image,[self._image_center[0] + self._counter * self._image_size[0],self._image_center[1],],self._image_size,self._pos,self._image_size,self._angle)
+            canvas.draw_image(self._image, [self._image_center[0] + self._counter * self._image_size[0],self._image_center[1]], self._image_size, self._pos, self._image_size, self._angle)
         
-        #Если это обыкновенный метеорит (без анимации)
+        #Если это обыкновенный метеорит или пуля (без анимации)
         else:
             canvas.draw_image(self._image, self._image_center, self._image_size, self._pos, self._image_size, self._angle)
 
@@ -86,6 +91,7 @@ class Sprite:
         - Позиция
         - Время жизни (для анимации)
         """
+        #Угол вращения
         self._angle += self._angle_vel
         self._pos[0] = (self._pos[0] + self._vel[0]) % WIDTH
         self._pos[1] = (self._pos[1] + self._vel[1]) % HEIGHT
@@ -96,21 +102,34 @@ class Sprite:
         return False
 
     def collide(self, other_object):
-        """Столкновение с другим объектом"""
+        """
+        Столкновение с другим объектом
+        """
+
+        #Теорема Пифагора, 8 класс
         dist = math.pow((self.position[0] - other_object.position[0]), 2) + math.pow((self.position[1] - other_object.position[1]), 2)
         dist = math.pow(dist, 0.5)
+
+        #Было столкновение
         if self._radius + other_object.radius > dist:
             return True
+
+        #Не было столкновения
         return False
 
 class SpaceShip:
     """Класс космического корабля"""
 
     def __init__(self, pos, vel, angle, image, info):
+        #Позиция
         self._pos = [pos[0], pos[1]]
+        #Скорость
         self._vel = [vel[0], vel[1]]
+        #Угол текущий
         self._angle = angle
+        #Угол вращения
         self._angle_vel = 0
+
         self._image = image
         self._image_center = info.center
         self._image_size = info.size
@@ -122,6 +141,7 @@ class SpaceShip:
 
         #Если перемещаемся вперед, то отображаем изображение с огнем
         if self._ismove:
+            #Размер корабля в пикселях
             t = 90
             canvas.draw_image(self._image, (self._image_center[0] + t, self._image_center[1]), self._image_size, self._pos, self._image_size, self._angle)
         #Если не перемещаемся, то отображаем изображения корабля без огня
@@ -137,24 +157,30 @@ class SpaceShip:
         self._angle += self._angle_vel
         self._pos[0] = (self._pos[0] + self._vel[0]) % WIDTH
         self._pos[1] = (self._pos[1] + self._vel[1]) % HEIGHT
+        
         fv = angle_to_vector(self._angle)
 
+        #Если перемещаемся
         if self._ismove:
             self._vel[0] += fv[0] / 10
             self._vel[1] += fv[1] / 10
 
-        self._vel[0] *= 1 - 0.01
-        self._vel[1] *= 1 - 0.01
+        #Скорость перемещения
+        self._vel[0] *= 1 - 0.001
+        self._vel[1] *= 1 - 0.001
 
     def shoot(self, started, bullet_group, bullet_image, bullet_info):
         """Стрельба"""
 
         if not started:
             return
+        
         vel = [0, 0]
         fw = angle_to_vector(self._angle)
-        vel[0] = self._vel[0] + fw[0] * 5
-        vel[1] = self._vel[0] + fw[1] * 5
+        
+        #Скорость пули
+        vel[0] = self._vel[0] + fw[0] * 15
+        vel[1] = self._vel[0] + fw[1] * 15
         bullet_pos = [self._pos[0] + fw[0] * 40, self._pos[1] + fw[1] * 40]
         a_bullet = Sprite(bullet_pos, vel, 0, 0, bullet_image, bullet_info)
         bullet_group.add(a_bullet)

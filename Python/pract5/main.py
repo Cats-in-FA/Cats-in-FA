@@ -21,8 +21,8 @@ frontground = ImageStorage(ImageInfo([400, 400], [800, 800]), tk.load_image("./i
 logo = ImageStorage(ImageInfo([200, 150], [400, 300]), tk.load_image("./img/logo.png"))
 #Космический корабль
 catship_img = ImageStorage(ImageInfo([45, 45], [90, 90], 35), tk.load_image("./img/ship.png"))
-#Кама-пуля
-bullet = ImageStorage(ImageInfo([5, 5], [10, 10], 3, 50), tk.load_image("./img/bullet.png"))
+#Пуля
+bullet = ImageStorage(ImageInfo([5, 5], [10, 10], 3, 17), tk.load_image("./img/bullet.png"))
 #Астероид
 asteroid = ImageStorage(ImageInfo([45, 45], [90, 90], 40), tk.load_image("./img/asteroid.png"))
 #Взрыв (анимация)
@@ -52,10 +52,10 @@ def asteroids_spawner():
     global asteroidsgroup_set, catship
 
     #Рандомное место спавна для астероида
-    asteroid_sprite = Sprite([random.choice(range(WIDTH)), random.choice(range(HEIGHT))],[1, 1],0.1,random.choice([-0.01, 0.01]),asteroid.image,asteroid.info,)
+    asteroid_sprite = Sprite([random.choice(range(WIDTH)), random.choice(range(HEIGHT))],[1, 1], 0.1 ,random.choice([-0.01, 0.01]),asteroid.image,asteroid.info)
 
     #Кол-во метеоритов на карте одновременно
-    if (len(asteroidsgroup_set) < 50 and dist(asteroid_sprite.position, catship.position) > 70 and GAME_STARTED):
+    if (len(asteroidsgroup_set) < 50 and dist(asteroid_sprite.position, catship.position) > 150 and GAME_STARTED):
         asteroidsgroup_set.add(asteroid_sprite)
 
 
@@ -63,11 +63,12 @@ def draw(canvas):
     """Отрисовщик интерфейса"""
     global TIME, SCORE, asteroidsgroup_set, LIVES, catship, bulletsgroup_set, GAME_STARTED
 
-    #Анимация бекграунда кадра
-    TIME += 3
-    wtime = (TIME / 4) % WIDTH
+    #Анимация фронта кадра
+    TIME += 1
+    wtime = (TIME / 2) % WIDTH
     center = frontground.info.center
     size = frontground.info.size
+    
     #Отрисовка бекграунда
     canvas.draw_image(background.image,background.info.center,background.info.size,[WIDTH / 2, HEIGHT / 2],[WIDTH, HEIGHT],)
     
@@ -119,7 +120,7 @@ def draw(canvas):
     if group_collide(asteroidsgroup_set, catship):
         LIVES -= 1
 
-    # Если мы убили метеорит - у нас прибавились очки
+    # Если мы взорвали метеорит - у нас прибавились очки по кол-ву истребленных метеоритов
     SCORE += group_group_collide(asteroidsgroup_set, bulletsgroup_set)
 
 
@@ -139,9 +140,11 @@ def process_sprite_group(group_set, canvas):
             group_set.remove(sprite)
 
 def group_collide(group_set, other_object):
-    """TODO Столкновение группы с одним объектом не из этой группы"""
-
-    print("group_collide работает")
+    """
+    Столкновение группы с одним объектом
+    - Используется для столкновения пули с метеоритом
+    - Используется для столкновения корабля с метеоритом
+    """
     for sprite in set(group_set):
 
         #Если попали в другой объект
@@ -159,20 +162,16 @@ def group_collide(group_set, other_object):
     return False
 
 
-def group_group_collide(group1, group2):
-    """TODO Столкновение группы с группой"""
-    
-    print("group_group_collide работает")
+def group_group_collide(asteroids_set, bullets_set):
+    """Логика столкновения астероидов с пулей"""
 
     counter = 0
-    for sprite in copy(group1):
+    for sprite in copy(asteroids_set):
 
-        if group_collide(group2, sprite):
-            group1.discard(sprite)
+        if group_collide(bullets_set, sprite):
+            asteroids_set.discard(sprite)
             counter += 1
     return counter
-
-
 
 def keydown(button_id):
     """Метод отрабатывает, когда кнопки нажимаются"""
@@ -213,7 +212,6 @@ def keyup(button_id):
     if button_id == 38 or button_id == 87:
         catship.ismove = False
 
-
 localeframe = tk.create_frame("Практика 5. Астероиды", WIDTH, HEIGHT)
 catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship_img.image, catship_img.info)
 
@@ -222,9 +220,10 @@ localeframe.set_draw_handler(draw)
 localeframe.set_keydown_handler(keydown)
 localeframe.set_keyup_handler(keyup)
 localeframe.set_mouseclick_handler(click)
+
 #Таймер для спавна метеоритов
 timer = tk.create_timer(1000.0, asteroids_spawner)
 
-#Старт таймеров и т д
+#Старт таймеров
 timer.start()
 localeframe.start()
