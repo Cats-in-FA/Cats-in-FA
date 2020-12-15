@@ -110,6 +110,7 @@ def draw(canvas):
 
     #Если уже начали игру
     if GAME_STARTED:
+        #Отрисовка каждого объекта в каждой группе на канвас
         process_sprite_group(asteroidsgroup_set, canvas)
         process_sprite_group(bulletsgroup_set, canvas)
         process_sprite_group(explosionsgroup_set, canvas)
@@ -124,10 +125,15 @@ def draw(canvas):
 
 
 def process_sprite_group(s, canvas):
-    """#TODO ПОНЯТЬ ЧЕ ЭТО"""
-
+    """
+    Отрисовка каждого объекта из множества s
+    на канвас
+    """
     for sprite in set(s):
+
+        #Отриовка
         sprite.draw(canvas)
+        
         if sprite.update():
             s.remove(sprite)
 
