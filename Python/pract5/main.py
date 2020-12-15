@@ -64,8 +64,8 @@ def draw(canvas):
     global TIME, SCORE, asteroidsgroup_set, LIVES, catship, bulletsgroup_set, GAME_STARTED
 
     #Анимация бекграунда кадра
-    TIME += 3
-    wtime = (TIME / 4) % WIDTH
+    TIME += 1
+    wtime = (TIME / 2) % WIDTH
     center = frontground.info.center
     size = frontground.info.size
     #Отрисовка бекграунда
