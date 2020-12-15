@@ -52,10 +52,10 @@ def asteroids_spawner():
     global asteroidsgroup_set, catship
 
     #Рандомное место спавна для астероида
-    asteroid_sprite = Sprite([random.choice(range(WIDTH)), random.choice(range(HEIGHT))],[1, 1], 0.1 ,random.choice([-0.01, 0.01]),asteroid.image,asteroid.info)
+    asteroid_sprite = Sprite([random.choice(range(WIDTH)), random.choice(range(HEIGHT))],[random.randint(1,3), random.randint(1,3)], random.choice([-0.1, 0.1]) ,random.choice([-0.01, 0.01]),asteroid.image,asteroid.info)
 
     #Кол-во метеоритов на карте одновременно
-    if (len(asteroidsgroup_set) < 50 and dist(asteroid_sprite.position, catship.position) > 150 and GAME_STARTED):
+    if (len(asteroidsgroup_set) < 50 and dist(asteroid_sprite.position, catship.position) > 200 and GAME_STARTED):
         asteroidsgroup_set.add(asteroid_sprite)
 
 
@@ -119,6 +119,12 @@ def draw(canvas):
     #Если врезался в нас метеорит - отнимаем жизни
     if group_collide(asteroidsgroup_set, catship):
         LIVES -= 1
+        catship.position = [HEIGHT / 2, WIDTH / 2]
+        catship.vel = [0,0]
+        catship.angle = 0
+        catship.angle_vel = 0
+        catship.draw(canvas)
+        catship.update()
 
     # Если мы взорвали метеорит - у нас прибавились очки по кол-ву истребленных метеоритов
     SCORE += group_group_collide(asteroidsgroup_set, bulletsgroup_set)

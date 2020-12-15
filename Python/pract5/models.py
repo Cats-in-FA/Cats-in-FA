@@ -210,6 +210,10 @@ class SpaceShip:
     def position(self):
         return self._pos
 
+    @position.setter
+    def position(self, value):
+        self._pos = value
+
     @property
     def radius(self):
         return self._radius
@@ -217,3 +221,33 @@ class SpaceShip:
     @radius.setter
     def radius(self, value):
         self._radius = value
+    
+    @property
+    def vel(self):
+        return self._vel
+    
+    @vel.setter
+    def vel(self, value):
+        self._vel = value
+
+    @property
+    def angle(self):
+        return self_angle
+
+    @angle.setter
+    def angle(self, value):
+        self._angle = value
+
+    @property
+    def angle_vel(self):
+        return self._angle_vel
+
+    @angle_vel.setter
+    def angle_vel(self, value):
+        self._angle_vel = value
+    
+
+
+        
+
+    
