@@ -29,7 +29,8 @@ class Frame:
     def _canvas_init(self, width, height):
         canvas_frame = tkinter.Frame(self._root)
         self._canvas = Canvas(canvas_frame, width, height)
-        canvas_frame.grid(row=0, column=0, rowspan=1, padx=0, pady=0,sticky=(tkinter.N, tkinter.S, tkinter.W, tkinter.E))
+        canvas_frame.grid(row=0, column=0, rowspan=1, padx=0, pady=0,
+                          sticky=(tkinter.N, tkinter.S, tkinter.W, tkinter.E))
 
     def _control_frame_init(self, width):
         self._control_frame = tkinter.Frame(self._root, width=width)

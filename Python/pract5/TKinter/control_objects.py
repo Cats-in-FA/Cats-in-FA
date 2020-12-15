@@ -11,12 +11,11 @@ except ImportError:
     import tkinter
     import tkinter.font as tkfont
 
-
 _BaseString = ('This is a really boring basic string used for width '
                'calculations.')
 
 
-class Widget(object):
+class Widget:
     def __init__(self, widget, width):
         self._widget = widget
         if width is not None:

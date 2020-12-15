@@ -9,10 +9,8 @@ try:
 except ImportError:
     import tkinter
 
-from .control_objects import Label
 
-
-class KeyMap(object):
+class KeyMap:
     def __init__(self):
         # JavaScript keycode translations
         self._tr = {'up': 38, 'down': 40, 'left': 37, 'right': 39,

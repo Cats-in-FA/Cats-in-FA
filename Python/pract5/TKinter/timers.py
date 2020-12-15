@@ -7,7 +7,7 @@ from __future__ import division
 import threading
 
 
-class Timer(object):
+class Timer:
     def __init__(self, interval, timer_handler):
         self._interval = interval
         self._timer = None

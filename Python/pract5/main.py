@@ -9,7 +9,7 @@ from imagelogic import ImageStorage
 # Константы
 WIDTH, HEIGHT = (800,)*2
 SCORE = 0
-LIVES = 5
+LIVES = 3
 TIME = 0
 GAME_STARTED = False
 
@@ -21,8 +21,8 @@ frontground = ImageStorage(ImageInfo([400, 400], [800, 800]), tk.load_image("./i
 logo = ImageStorage(ImageInfo([200, 150], [400, 300]), tk.load_image("./img/logo.png"))
 #Космический корабль
 catship_img = ImageStorage(ImageInfo([45, 45], [90, 90], 35), tk.load_image("./img/ship.png"))
-#Кама-пуля
-bullet = ImageStorage(ImageInfo([5, 5], [10, 10], 3, 50), tk.load_image("./img/bullet.png"))
+#Пуля
+bullet = ImageStorage(ImageInfo([5, 5], [10, 10], 3, 17), tk.load_image("./img/bullet.png"))
 #Астероид
 asteroid = ImageStorage(ImageInfo([45, 45], [90, 90], 40), tk.load_image("./img/asteroid.png"))
 #Взрыв (анимация)
@@ -44,7 +44,7 @@ def click(pos):
     
     if (not GAME_STARTED) and inwidth and inheight:
         GAME_STARTED = True
-        LIVES = 5
+        LIVES = 3
         SCORE = 0
 
 def asteroids_spawner():
@@ -52,10 +52,10 @@ def asteroids_spawner():
     global asteroidsgroup_set, catship
 
     #Рандомное место спавна для астероида
-    asteroid_sprite = Sprite([random.choice(range(WIDTH)), random.choice(range(HEIGHT))],[1, 1],0.1,random.choice([-0.01, 0.01]),asteroid.image,asteroid.info,)
+    asteroid_sprite = Sprite([random.choice(range(WIDTH)), random.choice(range(HEIGHT))],[random.randint(1,3), random.randint(1,3)], random.choice([-0.1, 0.1]) ,random.choice([-0.01, 0.01]),asteroid.image,asteroid.info)
 
     #Кол-во метеоритов на карте одновременно
-    if (len(asteroidsgroup_set) < 50 and dist(asteroid_sprite.position, catship.position) > 70 and GAME_STARTED):
+    if (len(asteroidsgroup_set) < 50 and dist(asteroid_sprite.position, catship.position) > 200 and GAME_STARTED):
         asteroidsgroup_set.add(asteroid_sprite)
 
 
@@ -68,6 +68,7 @@ def draw(canvas):
     wtime = (TIME / 2) % WIDTH
     center = frontground.info.center
     size = frontground.info.size
+    
     #Отрисовка бекграунда
     canvas.draw_image(background.image,background.info.center,background.info.size,[WIDTH / 2, HEIGHT / 2],[WIDTH, HEIGHT],)
     
@@ -110,6 +111,7 @@ def draw(canvas):
 
     #Если уже начали игру
     if GAME_STARTED:
+        #Отрисовка каждого объекта в каждой группе на канвас
         process_sprite_group(asteroidsgroup_set, canvas)
         process_sprite_group(bulletsgroup_set, canvas)
         process_sprite_group(explosionsgroup_set, canvas)
@@ -117,26 +119,43 @@ def draw(canvas):
     #Если врезался в нас метеорит - отнимаем жизни
     if group_collide(asteroidsgroup_set, catship):
         LIVES -= 1
+        catship.position = [HEIGHT / 2, WIDTH / 2]
+        catship.vel = [0,0]
+        catship.angle = 0
+        catship.angle_vel = 0
+        catship.draw(canvas)
+        catship.update()
 
-    # Если мы убили метеорит - у нас прибавились очки
+    # Если мы взорвали метеорит - у нас прибавились очки по кол-ву истребленных метеоритов
     SCORE += group_group_collide(asteroidsgroup_set, bulletsgroup_set)
 
 
 
-def process_sprite_group(s, canvas):
+def process_sprite_group(group_set, canvas):
+    """
+    Отрисовка и обновление каждого объекта из множества group_set
+    на канвас
+    """
+    for sprite in set(group_set):
 
-    for sprite in set(s):
+        #Отрисовка на канвас
         sprite.draw(canvas)
+        
+        #Если это анимация взрыва и она прошла, то удаляем ее из множества
         if sprite.update():
-            s.remove(sprite)
+            group_set.remove(sprite)
 
-def group_collide(s, other_object):
-
-    for sprite in set(s):
+def group_collide(group_set, other_object):
+    """
+    Столкновение группы с одним объектом
+    - Используется для столкновения пули с метеоритом
+    - Используется для столкновения корабля с метеоритом
+    """
+    for sprite in set(group_set):
 
         #Если попали в другой объект
         if sprite.collide(other_object):
-            s.remove(sprite)
+            group_set.remove(sprite)
             explosion_pos = sprite.position
             explosion_vel = [0, 0]
             explosion_avel = 0
@@ -149,17 +168,16 @@ def group_collide(s, other_object):
     return False
 
 
-def group_group_collide(group1, group2):
+def group_group_collide(asteroids_set, bullets_set):
+    """Логика столкновения астероидов с пулей"""
 
     counter = 0
-    for sprite in copy(group1):
+    for sprite in copy(asteroids_set):
 
-        if group_collide(group2, sprite):
-            group1.discard(sprite)
+        if group_collide(bullets_set, sprite):
+            asteroids_set.discard(sprite)
             counter += 1
     return counter
-
-
 
 def keydown(button_id):
     """Метод отрабатывает, когда кнопки нажимаются"""
@@ -200,7 +218,6 @@ def keyup(button_id):
     if button_id == 38 or button_id == 87:
         catship.ismove = False
 
-
 localeframe = tk.create_frame("Практика 5. Астероиды", WIDTH, HEIGHT)
 catship = SpaceShip([WIDTH / 2, HEIGHT / 2], [0, 0], 0, catship_img.image, catship_img.info)
 
@@ -209,9 +226,10 @@ localeframe.set_draw_handler(draw)
 localeframe.set_keydown_handler(keydown)
 localeframe.set_keyup_handler(keyup)
 localeframe.set_mouseclick_handler(click)
+
 #Таймер для спавна метеоритов
 timer = tk.create_timer(1000.0, asteroids_spawner)
 
-#Старт таймеров и т д
+#Старт таймеров
 timer.start()
 localeframe.start()
