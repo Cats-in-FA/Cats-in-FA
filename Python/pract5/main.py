@@ -9,7 +9,7 @@ from imagelogic import ImageStorage
 # Константы
 WIDTH, HEIGHT = (800,)*2
 SCORE = 0
-LIVES = 5
+LIVES = 3
 TIME = 0
 GAME_STARTED = False
 
@@ -44,7 +44,7 @@ def click(pos):
     
     if (not GAME_STARTED) and inwidth and inheight:
         GAME_STARTED = True
-        LIVES = 5
+        LIVES = 3
         SCORE = 0
 
 def asteroids_spawner():
