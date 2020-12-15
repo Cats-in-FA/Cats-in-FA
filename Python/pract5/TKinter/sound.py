@@ -5,13 +5,14 @@
 from __future__ import division
 
 import io
+
 try:
     from urllib2 import urlopen
 except ImportError:
     from urllib.request import urlopen
 
 
-class Sound(object):
+class Sound:
     def __init__(self, url):
         import pygame
         self._channel = None
@@ -44,6 +45,7 @@ class Sound(object):
 
     def set_volume(self, volume):
         self._sound.set_volume(volume)
+
 
 _initialized = False
 

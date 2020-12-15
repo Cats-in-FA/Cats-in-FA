@@ -4,10 +4,11 @@
 
 from __future__ import division
 
-import io
 import math
+
 from PIL import Image as PILImage
 from PIL import ImageTk
+
 
 class Image:
     def __init__(self, path):

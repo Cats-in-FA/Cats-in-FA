@@ -6,7 +6,6 @@ from __future__ import division
 
 from string import hexdigits
 
-
 ColorMap = {'aqua': '#00ffff',
             'black': '#000000',
             'blue': '#0000ff',

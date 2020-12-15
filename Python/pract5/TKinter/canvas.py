@@ -16,7 +16,7 @@ import time
 from .constants import map_color
 
 
-class Canvas(object):
+class Canvas:
     Fps = 60
     IntervalMs = int(1000 // Fps)
     MinRefreshMs = 1
