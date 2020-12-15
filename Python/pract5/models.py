@@ -1,10 +1,8 @@
 """Модуль с основными моделями для игры"""
+
 import math
 from util import angle_to_vector
-
-WIDTH = 800
-HEIGHT = 800
-
+WIDTH, HEIGHT = (800,)*2
 
 class ImageInfo:
     """
@@ -13,175 +11,193 @@ class ImageInfo:
     """
 
     def __init__(self, center, size, radius=0, lifespan=None, animated=False):
-        self.center = center
-        self.size = size
-        self.radius = radius
+        self._center = center
+        self._size = size
+        self._radius = radius
         if lifespan:
-            self.lifespan = lifespan
+            self._lifespan = lifespan
         else:
-            self.lifespan = float("inf")
-        self.animated = animated
+            self._lifespan = float("inf")
+        self._animated = animated
 
-    def get_center(self):
-        return self.center
+    @property
+    def center(self):
+        return self._center
 
-    def get_size(self):
-        return self.size
+    @property
+    def size(self):
+        return self._size
 
-    def get_radius(self):
-        return self.radius
+    @property
+    def radius(self):
+        return self._radius
 
-    def get_lifespan(self):
-        return self.lifespan
+    @property
+    def lifespan(self):
+        return self._lifespan
 
-    def get_animated(self):
-        return self.animated
-
+    @property
+    def animated(self):
+        return self._animated
 
 class Sprite:
-    """Класс спрайта"""
+    """
+    Класс спрайта
+    Используется для всех объектов
+    """
 
     def __init__(self, pos, vel, ang, ang_vel, image, info):
-        self.pos = [pos[0], pos[1]]
-        self.vel = [vel[0], vel[1]]
-        self.angle = ang
-        self.angle_vel = ang_vel
-        self.image = image
-        self.image_center = info.get_center()
-        self.image_size = info.get_size()
-        self.radius = info.get_radius()
-        self.lifespan = info.get_lifespan()
-        self.animated = info.get_animated()
-        self.age = 0
+        self._pos = [pos[0], pos[1]]
+        self._vel = [vel[0], vel[1]]
+        self._angle = ang
+        self._angle_vel = ang_vel
+        self._image = image
+        self._image_center = info.center
+        self._image_size = info.size
+        self._radius = info.radius
+        self._lifespan = info.lifespan
+        self._animated = info.animated
+        self._age = 0
 
-    def getPosition(self):
-        return self.pos
+    @property
+    def position(self):
+        return self._pos
 
-    def getRadius(self):
-        return self.radius
+    @property
+    def radius(self):
+        return self._radius
+    
 
     def draw(self, canvas):
 
-        if self.animated:
+        if self._animated:
             canvas.draw_image(
-                self.image,
+                self._image,
                 [
-                    self.image_center[0] + self.age * self.image_size[0],
-                    self.image_center[1],
+                    self._image_center[0] + self._age * self._image_size[0],
+                    self._image_center[1],
                 ],
-                self.image_size,
-                self.pos,
-                self.image_size,
-                self.angle,
+                self._image_size,
+                self._pos,
+                self._image_size,
+                self._angle,
             )
         else:
             canvas.draw_image(
-                self.image,
-                self.image_center,
-                self.image_size,
-                self.pos,
-                self.image_size,
-                self.angle,
+                self._image,
+                self._image_center,
+                self._image_size,
+                self._pos,
+                self._image_size,
+                self._angle,
             )
 
     def update(self):
-        self.angle += self.angle_vel
+        self._angle += self._angle_vel
 
-        self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH
-        self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT
+        self._pos[0] = (self._pos[0] + self._vel[0]) % WIDTH
+        self._pos[1] = (self._pos[1] + self._vel[1]) % HEIGHT
 
-        self.age += 1
+        self._age += 1
 
-        if self.age > self.lifespan:
+        if self._age > self._lifespan:
             return True
         else:
             return False
 
     def collide(self, other_object):
         dist = math.pow(
-            (self.getPosition()[0] - other_object.getPosition()[0]), 2
-        ) + math.pow((self.getPosition()[1] - other_object.getPosition()[1]), 2)
+            (self.position[0] - other_object.position[0]), 2
+        ) + math.pow((self.position[1] - other_object.position[1]), 2)
         dist = math.pow(dist, 0.5)
-        if self.getRadius() + other_object.getRadius() > dist:
+        if self._radius + other_object.radius > dist:
             return True
         return False
-
 
 class SpaceShip:
     """Класс космического корабля"""
 
     def __init__(self, pos, vel, angle, image, info):
-        self.pos = [pos[0], pos[1]]
-        self.vel = [vel[0], vel[1]]
-        self.thrust = False
-        self.angle = angle
-        self.angle_vel = 0
-        self.image = image
-        self.image_center = info.get_center()
-        self.image_size = info.get_size()
-        self.radius = info.get_radius()
-        self.thrust = False
+        self._pos = [pos[0], pos[1]]
+        self._vel = [vel[0], vel[1]]
+        self._angle = angle
+        self._angle_vel = 0
+        self._image = image
+        self._image_center = info.center
+        self._image_size = info.size
+        self._radius = info.radius
+        self._thrust = False
 
     def draw(self, canvas):
 
-        if self.thrust:
+        if self._thrust:
 
             t = 90
 
             canvas.draw_image(
-                self.image,
-                (self.image_center[0] + t, self.image_center[1]),
-                self.image_size,
-                self.pos,
-                self.image_size,
-                self.angle,
+                self._image,
+                (self._image_center[0] + t, self._image_center[1]),
+                self._image_size,
+                self._pos,
+                self._image_size,
+                self._angle,
             )
 
         else:
             canvas.draw_image(
-                self.image,
-                self.image_center,
-                self.image_size,
-                self.pos,
-                self.image_size,
-                self.angle,
+                self._image,
+                self._image_center,
+                self._image_size,
+                self._pos,
+                self._image_size,
+                self._angle,
             )
 
     def update(self):
 
-        self.angle += self.angle_vel
+        self._angle += self._angle_vel
 
-        self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH
-        self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT
+        self._pos[0] = (self._pos[0] + self._vel[0]) % WIDTH
+        self._pos[1] = (self._pos[1] + self._vel[1]) % HEIGHT
 
-        fv = angle_to_vector(self.angle)
+        fv = angle_to_vector(self._angle)
 
-        if self.thrust:
-            self.vel[0] += fv[0] / 10
-            self.vel[1] += fv[1] / 10
+        if self._thrust:
+            self._vel[0] += fv[0] / 10
+            self._vel[1] += fv[1] / 10
 
-        self.vel[0] *= 1 - 0.01
-        self.vel[1] *= 1 - 0.01
+        self._vel[0] *= 1 - 0.01
+        self._vel[1] *= 1 - 0.01
 
     def incAv(self):
 
-        self.angle_vel -= 0.1
+        self._angle_vel -= 0.1
 
     def decAv(self):
 
-        self.angle_vel += 0.1
+        self._angle_vel += 0.1
 
     def setAv(self):
-        self.angle_vel = 0
+        self._angle_vel = 0
 
-    def setThrustOn(self, val):
-        self.thrust = val
+    @property
+    def ismove(self):
+        return self._thrust
+    
+    @ismove.setter
+    def ismove(self, val):
+        self._thrust = val
 
-    def getPosition(self):
-        return self.pos
-
-    def getRadius(self):
-        return self.radius
+    @property
+    def position(self):
+        return self._pos
+    @property
+    def radius(self):
+        return self._radius
+    
+    @radius.setter
+    def radius(self, value):
+        self._radius = value
 
     def shoot(self, started, missile_group, missile_image, missile_info):
         """Стрельба"""
@@ -189,10 +205,10 @@ class SpaceShip:
         if not started:
             return
         vel = [0, 0]
-        fw = angle_to_vector(self.angle)
-        vel[0] = self.vel[0] + fw[0] * 5
-        vel[1] = self.vel[0] + fw[1] * 5
-        missile_pos = [self.pos[0] + fw[0] * 40, self.pos[1] + fw[1] * 40]
+        fw = angle_to_vector(self._angle)
+        vel[0] = self._vel[0] + fw[0] * 5
+        vel[1] = self._vel[0] + fw[1] * 5
+        missile_pos = [self._pos[0] + fw[0] * 40, self._pos[1] + fw[1] * 40]
         a_missile = Sprite(missile_pos, vel, 0, 0, missile_image, missile_info)
         missile_group.add(a_missile)
         return missile_group
