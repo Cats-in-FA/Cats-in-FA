@@ -63,7 +63,7 @@ def draw(canvas):
     """Отрисовщик интерфейса"""
     global TIME, SCORE, asteroidsgroup_set, LIVES, catship, bulletsgroup_set, GAME_STARTED
 
-    #Анимация фронта кадра
+    #Анимация бекграунда кадра
     TIME += 1
     wtime = (TIME / 2) % WIDTH
     center = frontground.info.center
