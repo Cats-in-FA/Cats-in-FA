@@ -124,26 +124,29 @@ def draw(canvas):
 
 
 
-def process_sprite_group(s, canvas):
+def process_sprite_group(group_set, canvas):
     """
-    Отрисовка каждого объекта из множества s
+    Отрисовка и обновление каждого объекта из множества group_set
     на канвас
     """
-    for sprite in set(s):
+    for sprite in set(group_set):
 
-        #Отриовка
+        #Отрисовка на канвас
         sprite.draw(canvas)
         
+        #Если это анимация взрыва и она прошла, то удаляем ее из множества
         if sprite.update():
-            s.remove(sprite)
+            group_set.remove(sprite)
 
-def group_collide(s, other_object):
-    """#TODO ПОНЯТЬ ЧЕ ЭТО"""
-    for sprite in set(s):
+def group_collide(group_set, other_object):
+    """TODO Столкновение группы с одним объектом не из этой группы"""
+
+    print("group_collide работает")
+    for sprite in set(group_set):
 
         #Если попали в другой объект
         if sprite.collide(other_object):
-            s.remove(sprite)
+            group_set.remove(sprite)
             explosion_pos = sprite.position
             explosion_vel = [0, 0]
             explosion_avel = 0
@@ -157,7 +160,9 @@ def group_collide(s, other_object):
 
 
 def group_group_collide(group1, group2):
-    """#TODO ПОНЯТЬ ЧЕ ЭТО"""
+    """TODO Столкновение группы с группой"""
+    
+    print("group_group_collide работает")
 
     counter = 0
     for sprite in copy(group1):
