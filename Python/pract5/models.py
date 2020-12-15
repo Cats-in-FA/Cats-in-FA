@@ -69,6 +69,7 @@ class Sprite:
     
 
     def draw(self, canvas):
+        """TODO Отрисовка"""
 
         #Если анимировано
         if self._animated:
@@ -77,17 +78,16 @@ class Sprite:
             canvas.draw_image(self._image, self._image_center, self._image_size, self._pos, self._image_size, self._angle)
 
     def update(self):
+        """TODO Обновление"""
         self._angle += self._angle_vel
 
         self._pos[0] = (self._pos[0] + self._vel[0]) % WIDTH
         self._pos[1] = (self._pos[1] + self._vel[1]) % HEIGHT
-
         self._age += 1
 
         if self._age > self._lifespan:
             return True
-        else:
-            return False
+        return False
 
     def collide(self, other_object):
         """Столкновение с другим объектом"""
@@ -112,6 +112,7 @@ class SpaceShip:
         self._thrust = False
 
     def draw(self, canvas):
+        """TODO Отрисовка"""
 
         if self._thrust:
             t = 90
@@ -121,12 +122,11 @@ class SpaceShip:
             canvas.draw_image(self._image, self._image_center, self._image_size, self._pos, self._image_size, self._angle)
 
     def update(self):
+        """TODO Обновление"""
 
         self._angle += self._angle_vel
-
         self._pos[0] = (self._pos[0] + self._vel[0]) % WIDTH
         self._pos[1] = (self._pos[1] + self._vel[1]) % HEIGHT
-
         fv = angle_to_vector(self._angle)
 
         if self._thrust:
@@ -137,14 +137,15 @@ class SpaceShip:
         self._vel[1] *= 1 - 0.01
 
     def incAv(self):
-
+        """Поворот влево"""
         self._angle_vel -= 0.1
 
     def decAv(self):
-
+        """Поворот вправо"""
         self._angle_vel += 0.1
 
     def setAv(self):
+        """Окончание поворота влево/вправо"""
         self._angle_vel = 0
 
     @property
@@ -158,6 +159,7 @@ class SpaceShip:
     @property
     def position(self):
         return self._pos
+
     @property
     def radius(self):
         return self._radius
@@ -166,7 +168,7 @@ class SpaceShip:
     def radius(self, value):
         self._radius = value
 
-    def shoot(self, started, missile_group, missile_image, missile_info):
+    def shoot(self, started, bullet_group, bullet_image, bullet_info):
         """Стрельба"""
 
         if not started:
@@ -175,7 +177,7 @@ class SpaceShip:
         fw = angle_to_vector(self._angle)
         vel[0] = self._vel[0] + fw[0] * 5
         vel[1] = self._vel[0] + fw[1] * 5
-        missile_pos = [self._pos[0] + fw[0] * 40, self._pos[1] + fw[1] * 40]
-        a_missile = Sprite(missile_pos, vel, 0, 0, missile_image, missile_info)
-        missile_group.add(a_missile)
-        return missile_group
+        bullet_pos = [self._pos[0] + fw[0] * 40, self._pos[1] + fw[1] * 40]
+        a_bullet = Sprite(bullet_pos, vel, 0, 0, bullet_image, bullet_info)
+        bullet_group.add(a_bullet)
+        return bullet_group

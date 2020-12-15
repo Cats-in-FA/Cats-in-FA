@@ -124,6 +124,7 @@ def draw(canvas):
 
 
 def process_sprite_group(s, canvas):
+    """#TODO ПОНЯТЬ ЧЕ ЭТО"""
 
     for sprite in set(s):
         sprite.draw(canvas)
@@ -131,7 +132,7 @@ def process_sprite_group(s, canvas):
             s.remove(sprite)
 
 def group_collide(s, other_object):
-
+    """#TODO ПОНЯТЬ ЧЕ ЭТО"""
     for sprite in set(s):
 
         #Если попали в другой объект
@@ -150,6 +151,7 @@ def group_collide(s, other_object):
 
 
 def group_group_collide(group1, group2):
+    """#TODO ПОНЯТЬ ЧЕ ЭТО"""
 
     counter = 0
     for sprite in copy(group1):
