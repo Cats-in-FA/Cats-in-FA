@@ -1,25 +1,27 @@
+from pathlib import Path
 
 from logic import encrypt, decrypt
-from pathlib import Path
 
 
 def check_file(path_to_file: str) -> bool:
     p = Path(path_to_file)
     return p.exists() == True and p.is_dir() == False
 
-def read_file_strings(file_name: str) -> bytes:
 
-    with open(file_name, 'r') as ff:
+def read_file_strings(file_name: str) -> str:
+    with open(file_name, 'r', encoding="utf8") as ff:
         return ff.read()
+
 
 def read_file_bytes(file_name: str) -> bytes:
-
     with open(file_name, 'rb') as ff:
         return ff.read()
+
 
 def write_file_bytes(file_name: str, data: bytes) -> None:
     with open(file_name, 'wb') as ff:
         ff.write(data)
+
 
 def encrypt_logic(read_file_name: str, write_file_name: str, key: str) -> str:
     data = read_file_bytes(read_file_name)
@@ -47,7 +49,6 @@ def encrypt_logic(read_file_name: str, write_file_name: str, key: str) -> str:
 
 
 def decrypt_logic(read_file_name: str, write_file_name: str, key: str) -> str:
-
     data = read_file_bytes(read_file_name)
 
     decrypted_data = []

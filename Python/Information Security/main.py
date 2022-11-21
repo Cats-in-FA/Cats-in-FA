@@ -1,12 +1,14 @@
 import tkinter as tk
+
 from wrapper import decrypt_logic, encrypt_logic, check_file
+
 
 def clear():
     for i, field in enumerate(fields):
-        if i < len(fields)-1:
+        if i < len(fields) - 1:
             field.delete(0, tk.END)
         else:
-            field.config(text = "")
+            field.config(text="")
 
 
 def encrypt_wrapper():
@@ -16,8 +18,9 @@ def encrypt_wrapper():
         result = encrypt_logic(file_name, file_name, key)
     else:
         pass
-    fields[2].config(text = result)
-    
+    fields[2].config(text=result)
+
+
 def decrypt_wrapper():
     file_name = fields[0].get()
     key = fields[1].get()
@@ -25,10 +28,7 @@ def decrypt_wrapper():
         result = decrypt_logic(file_name, file_name, key)
     else:
         pass
-    fields[2].config(text = result)
-    
-
-
+    fields[2].config(text=result)
 
 
 # Создается новое окно с заголовком "Введите домашний адрес".
@@ -54,7 +54,7 @@ for i, text in enumerate(labels):
     # Создает ярлык с текстом из списка ярлыков.
     label = tk.Label(master=frm_form, text=text)
     # Создает текстовое поле которая соответствует ярлыку.
-    if i < len(labels)-1:
+    if i < len(labels) - 1:
         entry = tk.Entry(master=frm_form, width=50)
     else:
         entry = tk.Label(master=frm_form, width=42)
@@ -85,7 +85,6 @@ btn_clear.pack(side=tk.RIGHT)
 # справа от рамки `frm_buttons`.
 btn_clear = tk.Button(master=frm_buttons, text="Encrypt", command=encrypt_wrapper)
 btn_clear.pack(side=tk.RIGHT, padx=10, ipadx=10)
-
 
 # Запуск приложения.
 window.mainloop()

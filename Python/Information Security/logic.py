@@ -33,7 +33,7 @@ sbox = [
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 ]
 
-#Матрица для дешифровки
+# Матрица для дешифровки
 inv_sbox = [
     0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
     0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
@@ -53,19 +53,19 @@ inv_sbox = [
     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
 ]
 
-#Необходим для KeySchedule и заполнения её матрицы
+# Необходим для KeySchedule и заполнения её матрицы
 rcon = [[0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36],
         [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
-]
+        ]
 
 
 def encrypt(input_bytes, key):
     """Метод для шифрования байтов по AES(128), используя ключ key"""
 
-    #Создание массива хранения для состояний
-    #3-х мерный т.к. нам требуется хранить несколько состояний (2 номера состояния)
+    # Создание массива хранения для состояний
+    # 3-х мерный т.к. нам требуется хранить несколько состояний (2 номера состояния)
     state = [[] for j in range(4)]
     for r in range(4):
         for c in range(nb):
@@ -96,8 +96,8 @@ def encrypt(input_bytes, key):
 def decrypt(cipher, key):
     """Метод для дешифрования байтов по AES(128), используя ключ key"""
 
-    #Создание массива хранения для состояний
-    #3-х мерный т.к. нам требуется хранить несколько состояний (2 номера состояния)
+    # Создание массива хранения для состояний
+    # 3-х мерный т.к. нам требуется хранить несколько состояний (2 номера состояния)
     state = [[] for i in range(nb)]
     for r in range(4):
         for c in range(nb):
@@ -129,7 +129,7 @@ def decrypt(cipher, key):
 
 
 def sub_bytes(state, inv=False):
-    #Замена каждого байта из State на соответствующий ему из константной таблицы Sbox
+    # Замена каждого байта из State на соответствующий ему из константной таблицы Sbox
 
     if inv == False:
         box = sbox
@@ -147,7 +147,7 @@ def sub_bytes(state, inv=False):
 
 
 def shift_rows(state, inv=False):
-    #Циклический сдвиг влево построчно
+    # Циклический сдвиг влево построчно
 
     count = 1
 
@@ -164,9 +164,8 @@ def shift_rows(state, inv=False):
 
 
 def mix_columns(state, inv=False):
-    
-    #Каждая колонка в State представляется в виде многочлена и перемножается в поле GF(2^8)
-    #по модулю x4 + 1 с фиксированным многочленом 3x3 + x2 + x + 2
+    # Каждая колонка в State представляется в виде многочлена и перемножается в поле GF(2^8)
+    # по модулю x4 + 1 с фиксированным многочленом 3x3 + x2 + x + 2
 
     for i in range(nb):
 
@@ -190,7 +189,7 @@ def mix_columns(state, inv=False):
 
 
 def key_expansion(key):
-    #Метод для преобразования ключа-строки в ключ-матрицу
+    # Метод для преобразования ключа-строки в ключ-матрицу
 
     key_symbols = [ord(symbol) for symbol in key]
 
@@ -202,7 +201,6 @@ def key_expansion(key):
     for r in range(4):
         for c in range(nk):
             key_schedule[r].append(key_symbols[r + 4 * c])
-
 
     for col in range(nk, nb * (nr + 1)):
         if col % nk == 0:
@@ -216,8 +214,8 @@ def key_expansion(key):
                 sbox_elem = sbox[16 * sbox_row + sbox_col]
                 tmp[j] = sbox_elem
 
-            #XOR с константами из rCon.
-            
+            # XOR с константами из rCon.
+
             for row in range(4):
                 s = (key_schedule[row][col - 4]) ^ (tmp[row]) ^ (rcon[row][int(col / nk - 1)])
                 key_schedule[row].append(s)
@@ -241,7 +239,6 @@ def add_round_key(state, key_schedule, round=0):
     """
 
     for col in range(nk):
-
         s0 = state[0][col] ^ key_schedule[0][nb * round + col]
         s1 = state[1][col] ^ key_schedule[1][nb * round + col]
         s2 = state[2][col] ^ key_schedule[2][nb * round + col]
@@ -255,11 +252,8 @@ def add_round_key(state, key_schedule, round=0):
     return state
 
 
-
-
-
 def left_shift(array, count):
-    #Циклический сдвиг влево построчно
+    # Циклический сдвиг влево построчно
 
     res = array[:]
     for i in range(count):
@@ -271,7 +265,7 @@ def left_shift(array, count):
 
 
 def right_shift(array, count):
-    #Циклический сдвиг вправо построчно
+    # Циклический сдвиг вправо построчно
 
     res = array[:]
     for i in range(count):
@@ -283,7 +277,7 @@ def right_shift(array, count):
 
 
 def mul_by_02(num):
-    #Функция умножается на 2 в пространстве Галуа
+    # Функция умножается на 2 в пространстве Галуа
 
     if num < 0x80:
         res = (num << 1)
