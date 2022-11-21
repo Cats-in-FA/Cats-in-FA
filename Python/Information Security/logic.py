@@ -64,7 +64,8 @@ rcon = [[0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36],
 def encrypt(input_bytes, key):
     """Метод для шифрования байтов по AES(128), используя ключ key"""
 
-    # let's prepare our enter data: State array and KeySchedule
+    #Создание массива хранения для состояний
+    #3-х мерный т.к. нам требуется хранить несколько состояний (2 номера состояния)
     state = [[] for j in range(4)]
     for r in range(4):
         for c in range(nb):
@@ -95,7 +96,8 @@ def encrypt(input_bytes, key):
 def decrypt(cipher, key):
     """Метод для дешифрования байтов по AES(128), используя ключ key"""
 
-    # let's prepare our algorithm enter data: State array and KeySchedule
+    #Создание массива хранения для состояний
+    #3-х мерный т.к. нам требуется хранить несколько состояний (2 номера состояния)
     state = [[] for i in range(nb)]
     for r in range(4):
         for c in range(nb):
@@ -127,19 +129,9 @@ def decrypt(cipher, key):
 
 
 def sub_bytes(state, inv=False):
-    """That transformation replace every element from State on element from Sbox
-    according the algorithm: in hexadecimal notation an element from State
-    consist of two values: 0x<val1><val2>. We take elem from crossing
-    val1-row and val2-column in Sbox and put it instead of the element in State.
-    If decryption-transformation is on (inv == True) it uses InvSbox instead Sbox.
+    #Замена каждого байта из State на соответствующий ему из константной таблицы Sbox
 
-    Args:
-        inv -- If value == False means function is encryption-transformation.
-               True - decryption-transformation
-
-    """
-
-    if inv == False:  # encrypt
+    if inv == False:
         box = sbox
     else:  # decrypt
         box = inv_sbox
@@ -148,9 +140,6 @@ def sub_bytes(state, inv=False):
         for j in range(len(state[i])):
             row = state[i][j] // 0x10
             col = state[i][j] % 0x10
-
-            # Our Sbox is a flat array, not a bable. So, we use this trich to find elem:
-            # And DO NOT change list sbox! if you want it to work
             box_elem = box[16 * row + col]
             state[i][j] = box_elem
 
@@ -158,14 +147,7 @@ def sub_bytes(state, inv=False):
 
 
 def shift_rows(state, inv=False):
-    """That transformation shifts rows of State: the second rotate over 1 bytes,
-    the third rotate over 2 bytes, the fourtg rotate over 3 bytes. The transformation doesn't
-    touch the first row. When encrypting transformation uses left shift, in decription - right shift
-
-    Args:
-        inv: If value == False means function is encryption mode. True - decryption mode
-
-    """
+    #Циклический сдвиг влево построчно
 
     count = 1
 
@@ -182,15 +164,9 @@ def shift_rows(state, inv=False):
 
 
 def mix_columns(state, inv=False):
-    """When encrypting transformation multiplyes every column of State with
-    a fixed polinomial a(x) = {03}x**3 + {01}x**2 + {01}x + {02} in Galua field.
-    When decrypting multiplies with a'(x) = {0b}x**3 + {0d}x**2 + {09}x + {0e}
-    Detailed information in AES standart.
-
-    Args:
-        inv: If value == False means function is encryption mode. True - decryption mode
-
-    """
+    
+    #Каждая колонка в State представляется в виде многочлена и перемножается в поле GF(2^8)
+    #по модулю x4 + 1 с фиксированным многочленом 3x3 + x2 + x + 2
 
     for i in range(nb):
 
@@ -214,46 +190,41 @@ def mix_columns(state, inv=False):
 
 
 def key_expansion(key):
-    """It makes list of RoundKeys for function AddRoundKey. All details
-    about algorithm is is in AES standart
-
-    """
+    #Метод для преобразования ключа-строки в ключ-матрицу
 
     key_symbols = [ord(symbol) for symbol in key]
 
-    # ChipherKey shoul contain 16 symbols to fill 4*4 table. If it's less
-    # complement the key with "0x01"
     if len(key_symbols) < 4 * nk:
         for i in range(4 * nk - len(key_symbols)):
             key_symbols.append(0x01)
 
-    # make ChipherKey(which is base of KeySchedule)
     key_schedule = [[] for i in range(4)]
     for r in range(4):
         for c in range(nk):
             key_schedule[r].append(key_symbols[r + 4 * c])
 
-    # Comtinue to fill KeySchedule
-    for col in range(nk, nb * (nr + 1)):  # col - column number
+
+    for col in range(nk, nb * (nr + 1)):
         if col % nk == 0:
-            # take shifted (col - 1)th column...
+
             tmp = [key_schedule[row][col - 1] for row in range(1, 4)]
             tmp.append(key_schedule[0][col - 1])
 
-            # change its elements using Sbox-table like in SubBytes...
             for j in range(len(tmp)):
                 sbox_row = tmp[j] // 0x10
                 sbox_col = tmp[j] % 0x10
                 sbox_elem = sbox[16 * sbox_row + sbox_col]
                 tmp[j] = sbox_elem
 
-            # and finally make XOR of 3 columns
+            #XOR с константами из rCon.
+            
             for row in range(4):
                 s = (key_schedule[row][col - 4]) ^ (tmp[row]) ^ (rcon[row][int(col / nk - 1)])
                 key_schedule[row].append(s)
 
         else:
-            # just make XOR of 2 columns
+
+            # XOR двух колонок
             for row in range(4):
                 s = key_schedule[row][col - 4] ^ key_schedule[row][col - 1]
                 key_schedule[row].append(s)
@@ -262,13 +233,15 @@ def key_expansion(key):
 
 
 def add_round_key(state, key_schedule, round=0):
-    """That transformation combines State and KeySchedule together. Xor
-    of State and RoundSchedule(part of KeySchedule).
-
+    """
+    Трансформация производит побитовый XOR каждого элемента из State с
+    соответствующим элементом из RoundKey.
+    RoundKey — массив такого же размера, как и State, который строится для каждого
+    раунда на основе секретного ключа функцией KeyExpansion()
     """
 
     for col in range(nk):
-        # nb*round is a shift which indicates start of a part of the KeySchedule
+
         s0 = state[0][col] ^ key_schedule[0][nb * round + col]
         s1 = state[1][col] ^ key_schedule[1][nb * round + col]
         s2 = state[2][col] ^ key_schedule[2][nb * round + col]
@@ -282,10 +255,11 @@ def add_round_key(state, key_schedule, round=0):
     return state
 
 
-# Small helpful functions block
+
+
 
 def left_shift(array, count):
-    """Rotate the array over count times"""
+    #Циклический сдвиг влево построчно
 
     res = array[:]
     for i in range(count):
@@ -297,7 +271,7 @@ def left_shift(array, count):
 
 
 def right_shift(array, count):
-    """Rotate the array over count times"""
+    #Циклический сдвиг вправо построчно
 
     res = array[:]
     for i in range(count):
@@ -309,7 +283,7 @@ def right_shift(array, count):
 
 
 def mul_by_02(num):
-    """The function multiplies by 2 in Galua space"""
+    #Функция умножается на 2 в пространстве Галуа
 
     if num < 0x80:
         res = (num << 1)
@@ -320,31 +294,24 @@ def mul_by_02(num):
 
 
 def mul_by_03(num):
-    """The function multiplies by 3 in Galua space
-    example: 0x03*num = (0x02 + 0x01)num = num*0x02 + num
-    Addition in Galua field is oparetion XOR
-
+    """
+    Функция умножается на 3 в пространстве Галуа
+    Добавлением в поле Галуа является операция XOR
     """
     return (mul_by_02(num) ^ num)
 
 
 def mul_by_09(num):
-    # return mul_by_03(num)^mul_by_03(num)^mul_by_03(num) - works wrong, I don't know why
     return mul_by_02(mul_by_02(mul_by_02(num))) ^ num
 
 
 def mul_by_0b(num):
-    # return mul_by_09(num)^mul_by_02(num)
     return mul_by_02(mul_by_02(mul_by_02(num))) ^ mul_by_02(num) ^ num
 
 
 def mul_by_0d(num):
-    # return mul_by_0b(num)^mul_by_02(num)
     return mul_by_02(mul_by_02(mul_by_02(num))) ^ mul_by_02(mul_by_02(num)) ^ num
 
 
 def mul_by_0e(num):
-    # return mul_by_0d(num)^num
     return mul_by_02(mul_by_02(mul_by_02(num))) ^ mul_by_02(mul_by_02(num)) ^ mul_by_02(num)
-
-# End of small helpful functions block
