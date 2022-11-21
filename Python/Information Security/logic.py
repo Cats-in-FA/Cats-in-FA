@@ -1,19 +1,12 @@
-"""Tham module provides encrypting/decrypting according AES(128) standart.
-Based on Rijndael algorithm, AES uses 4 transformation for encrypting: SubSytes(), ShiftRows(),
-MixColumns() and AddRoundKey(). For decrypting it uses inverse functions of that fout.
-Detales you can read here:
-http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
-or here:
-http://en.wikipedia.org/wiki/Advanced_Encryption_Standard
-or here:
-http://www.cs.bc.edu/~straubin/cs381-05/blockciphers/rijndael_ingles2004.swf
-or somewhere else.
+"""
+Разработать программу шифровки-дешифровки по алгоритму AES-128.
+Данные берутся из файла, зашифрованные данные сохраняются в указанный файл.
 
-Comments rather won't help if don't read documentation of the algorithm.
-
+Использует режим электронной кодовой книги/Electronic Codebook/ECB
+https://habr.com/ru/post/212235/
 """
 
-nb = 4  # number of coloumn of State (for AES = 4)
+nb = 4  # число столбцов (32-х битных слов), составляющих State. Для стандарта регламентировано Nb = 4
 nr = 10  # number of rounds ib ciper cycle (if nb = 4 nr = 10)
 nk = 4  # the key length (in 32-bit words)
 
@@ -62,7 +55,7 @@ rcon = [[0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36],
         [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
-        ]
+]
 
 
 def encrypt(input_bytes, key):
@@ -369,9 +362,4 @@ def mul_by_0e(num):
     # return mul_by_0d(num)^num
     return mul_by_02(mul_by_02(mul_by_02(num))) ^ mul_by_02(mul_by_02(num)) ^ mul_by_02(num)
 
-
 # End of small helpful functions block
-
-
-def main():
-    encrypt(b'77697987', b'5808')
